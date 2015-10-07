@@ -1,5 +1,15 @@
 
 void PID_init(){
+  Serial.println("Roll");
+  String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KI) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
+  Serial.println(output);
+  Serial.println("Pitch");
+  output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
+  Serial.println(output);
+  Serial.println("Yaw");
+  output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
+  Serial.println(output);
+
     //                          Kp,        Ki,         Kd           Lval         Hval
   PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
   PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
@@ -12,7 +22,7 @@ void setPIDValues(){
   digitalWrite(LED_PIN,HIGH);
   bool done = false;
   while(!done){
-    while (Serial.available()){// empty buffer again
+    while (Serial.available() && bluetoothString.indexOf("end|") < 0){// empty buffer again
       delay(3);
       bluetoothChar = Serial.read();
       bluetoothString += bluetoothChar;
@@ -21,28 +31,41 @@ void setPIDValues(){
       while(bluetoothString != "")
       {
         String sub;
+        String num;
         int endIndex;
         endIndex = bluetoothString.indexOf("|");
         sub = bluetoothString.substring(0,endIndex);
-        Serial.println(sub);
         bluetoothString.remove(0,endIndex+1);
         endIndex = sub.indexOf(":");
-        if (sub == "YawP"){YAW_PID_KP = sub.substring(endIndex+1).toInt();}
-        if (sub == "YawI"){YAW_PID_KI = sub.substring(endIndex+1).toInt();}
-        if (sub == "YawD"){YAW_PID_KD = sub.substring(endIndex+1).toInt();}
-        if (sub == "PitchP"){PITCH_PID_KP = sub.substring(endIndex+1).toInt();}
-        if (sub == "PitchI"){PITCH_PID_KI = sub.substring(endIndex+1).toInt();}
-        if (sub == "PitchD"){PITCH_PID_KD = sub.substring(endIndex+1).toInt();}
-        if (sub == "RollP"){ROLL_PID_KP = sub.substring(endIndex+1).toInt();}
-        if (sub == "RollI"){ROLL_PID_KI = sub.substring(endIndex+1).toInt();}
-        if (sub == "RollD"){ROLL_PID_KD = sub.substring(endIndex+1).toInt();}
+        num = sub.substring(endIndex+1);
+        sub = sub.substring(0,endIndex);
+
+        char floatbuf[32]; // make this at least big enough for the whole string
+        num.toCharArray(floatbuf, sizeof(floatbuf));
+        double toChange = atof(floatbuf);
+        
+        if (sub == "YawP"){YAW_PID_KP = toChange;}
+        if (sub == "YawI"){YAW_PID_KI = toChange;}
+        if (sub == "YawD"){YAW_PID_KD = toChange;}
+        if (sub == "YawMax"){YAW_PID_MIN = -toChange;
+                             YAW_PID_MAX = toChange; }
+        if (sub == "PitchP"){PITCH_PID_KP = toChange;}
+        if (sub == "PitchI"){PITCH_PID_KI = toChange;}
+        if (sub == "PitchD"){PITCH_PID_KD = toChange;}
+        if (sub == "PitchMax"){PITCH_PID_MIN = -toChange;
+                               PITCH_PID_MAX = toChange;}
+        if (sub == "RollP"){ROLL_PID_KP = toChange;}
+        if (sub == "RollI"){ROLL_PID_KI = toChange;}
+        if (sub == "RollD"){ROLL_PID_KD = toChange;}
+        if (sub == "RollMax"){ROLL_PID_MIN = -toChange;
+                              ROLL_PID_MAX = toChange;}
       }
       done = true;
       digitalWrite(LED_PIN,LOW);
     }
     
   }
-  bluetoothString = "";
+  bluetoothString="";
 }
 
 void initCommunication()

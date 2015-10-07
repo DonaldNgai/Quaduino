@@ -38,11 +38,11 @@ void getThrottleValue(){
    if (Serial.available()) {
     
     while(Serial.available()){
-      delay(2);
+      delay(3);
       bluetoothChar = Serial.read();
       bluetoothString += bluetoothChar; 
     }
-
+  Serial.println(bluetoothString);
    pIndex = bluetoothString.indexOf('p');
    rIndex = bluetoothString.indexOf('r');
    tIndex = bluetoothString.indexOf('t');
