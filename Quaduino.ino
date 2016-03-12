@@ -10,6 +10,7 @@
 #include "Init.h"
 #include "Smooth.h"
 
+//#define BMP 0
 // ================================================================
 // ===                      INITIAL SETUP                       ===
 // ================================================================
@@ -17,7 +18,7 @@
 void setup() {
     initCommunication();
     
-    initBMP();
+    //initBMP();
     initMPU();
 
     PID_init();
@@ -32,7 +33,6 @@ void setup() {
 // ===                    SUPPORTING FUNCTIONS                     ===
 // ===================================================================
 
-
 void getThrottleValue(){
   
    if (Serial.available()) {
@@ -42,12 +42,18 @@ void getThrottleValue(){
       bluetoothChar = Serial.read();
       bluetoothString += bluetoothChar; 
     }
-  Serial.println(bluetoothString);
-   pIndex = bluetoothString.indexOf('p');
-   rIndex = bluetoothString.indexOf('r');
+//  Serial.println(bluetoothString);
+
+  char floatbuf[32]; // make this at least big enough for the whole string
+  String num;
+  
+   pIndex = bluetoothString.indexOf('P');
+   iIndex = bluetoothString.indexOf('I');
+   dIndex = bluetoothString.indexOf('D');
+   endIndex = bluetoothString.indexOf('|');
    tIndex = bluetoothString.indexOf('t');
 
-   if (tIndex == 0 && pIndex < 0 && rIndex < 0){
+   if (tIndex == 0 && pIndex < 0 && iIndex < 0 && dIndex < 0){
        bluetoothString.remove(0,1);
        tIndex = bluetoothString.indexOf('t');
         if (tIndex > 0)
@@ -63,19 +69,39 @@ void getThrottleValue(){
         }
       }        
       
-     else if (pIndex == 0 && rIndex > 0 && tIndex < 0){
-      setP = -bluetoothString.substring(1,rIndex).toInt();
-      bluetoothString.remove(0,rIndex);
-      pIndex = bluetoothString.indexOf('p');
-        if (pIndex > 0)
-        {
-          setR = bluetoothString.substring(1,pIndex).toInt();
+     else if (endIndex > 0){
+        num = bluetoothString.substring(2,endIndex);
+//        Serial.println(num);
+        num.toCharArray(floatbuf, sizeof(floatbuf));
+        double toChange = atof(floatbuf);
+//        Serial.println(toChange);
+        if(pIndex == 0){
+          ROLL_PID_KP = toChange;
+          PITCH_PID_KP = toChange;
         }
-        else
-        {
-          setR = bluetoothString.substring(1).toInt();
+        else if (iIndex == 0){
+          ROLL_PID_KI = toChange;
+          PITCH_PID_KI = toChange;
         }
+        else if (dIndex == 0){
+          ROLL_PID_KD = toChange;
+          PITCH_PID_KD = toChange;
+        }
+                  //                          Kp,        Ki,         Kd           Lval         Hval
+        PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
+        PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
+        PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
+        Serial.println("Roll");
+        String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
+        Serial.println(output);
+        Serial.println("Pitch");
+        output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
+        Serial.println(output);
+        Serial.println("Yaw");
+        output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
+        Serial.println(output);
       }
+      
       
     bluetoothString = "";
   }
@@ -90,26 +116,17 @@ void getPIDValues(){
 //  PIDyaw_val= (int)PIDyaw.Compute((float)setY-yprdegree[0]);
   PIDyaw_val = 0;
   PIDpitch_val= (int)PIDpitch.Compute((float)setP-digitalSmooth(yprdegree[1],pitchSmoothArray));
-  PIDroll_val= (int)PIDroll.Compute((float)setR-digitalSmooth(yprdegree[2],pitchSmoothArray));
+  PIDroll_val= (int)PIDroll.Compute((float)setR-digitalSmooth(yprdegree[2],rollSmoothArray));
 
 }
 
 void adjustMotors(){
   int m1_val=throttle+PIDroll_val+PIDpitch_val+PIDyaw_val;
-  int m2_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
+  int m2_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
+//  int m2_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
   int m3_val=throttle-PIDroll_val-PIDpitch_val+PIDyaw_val;
-  int m4_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
-
-#ifdef debug
-//  Serial.print("M1: ");
-//  Serial.print(m1_val);
-//  Serial.print(", M2: ");
-//  Serial.print(m2_val);
-//  Serial.print(", M3: ");
-//  Serial.print(m3_val);
-//  Serial.print(", M4: ");
-//  Serial.println(m4_val);
-#endif
+  int m4_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
+//  int m4_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
 
   if (throttle == MOTOR_ZERO_LEVEL) m1_val = MOTOR_ZERO_LEVEL;
   else if (m1_val < MOTOR_RUN_LEVEL) m1_val = MOTOR_RUN_LEVEL;
@@ -127,29 +144,14 @@ void adjustMotors(){
   else if (m4_val < MOTOR_RUN_LEVEL) m4_val = MOTOR_RUN_LEVEL;
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
-#ifdef debug
-//  Serial.print("Current Yaw: ");
+//  #ifdef debug
+//  Serial.print("Y: ");
 //  Serial.print(yprdegree[0]);
-//  Serial.print(", Current Pitch: ");
+//  Serial.print(", P: ");
 //  Serial.print(yprdegree[1]);
-//  Serial.print(", Current Roll: ");
-//  Serial.println(yprdegree[2]);
-//
-//  Serial.print("Yaw Error: ");
-//  Serial.print((float)setY-yprdegree[0]);
-//  Serial.print(", Pitch Error: ");
-//  Serial.print((float)setP-yprdegree[1]);
-//  Serial.print(", Roll Erro: ");
-//  Serial.println((float)setR-yprdegree[2]);
-//
-//  Serial.print("Yaw PID: ");
-//  Serial.print(PIDyaw_val);
-//  Serial.print(", Pitch PID: ");
-//  Serial.print(PIDpitch_val);
-//  Serial.print(", Roll PID: ");
-//  Serial.println(PIDroll_val);
-//
-//  Serial.print("M1: ");
+//  Serial.print(", R: ");
+//  Serial.print(yprdegree[2]);
+//  Serial.print(", M1: ");
 //  Serial.print(m1_val);
 //  Serial.print(", M2: ");
 //  Serial.print(m2_val);
@@ -157,7 +159,13 @@ void adjustMotors(){
 //  Serial.print(m3_val);
 //  Serial.print(", M4: ");
 //  Serial.println(m4_val);
-#endif
+//  Serial.print(", Y: ");
+//  Serial.print(PIDyaw_val);
+//  Serial.print(", P: ");
+//  Serial.print(PIDpitch_val);
+//  Serial.print(", R: ");
+//  Serial.println(PIDroll_val);
+//#endif
 
   analogWrite(MOTOR1,m1_val);
   analogWrite(MOTOR2,m2_val);
@@ -172,9 +180,9 @@ void updateSensors() {
       
     // wait for MPU interrupt or extra packet(s) available
     do {
+        #ifdef BMP
       P = getPressure();
       a = pressure.altitude(P,baseline);
-      #ifdef debug
         Serial.print("relative altitude: ");
         if (a >= 0.0) Serial.print(" "); // add a space for positive numbers
         if (a <= 0.0) a = 0;
@@ -219,14 +227,14 @@ void updateSensors() {
             yprdegree[0] = (ypr[0] * 180/M_PI);
             yprdegree[1] = (ypr[1] * 180/M_PI);
             yprdegree[2] = (ypr[2] * 180/M_PI);
-            #ifdef debug
-              Serial.print("ypr\t");
-              Serial.print(ypr[0] * 180/M_PI);
-              Serial.print("\t");
-              Serial.print(ypr[1] * 180/M_PI);
-              Serial.print("\t");
-              Serial.println(ypr[2] * 180/M_PI);
-            #endif
+            
+//              Serial.print("ypr\t");
+//              Serial.print(ypr[0] * 180/M_PI);
+//              Serial.print("\t");
+//              Serial.print(ypr[1] * 180/M_PI);
+//              Serial.print("\t");
+//              Serial.println(ypr[2] * 180/M_PI);
+            
             
         
     }

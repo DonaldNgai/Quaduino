@@ -4,19 +4,19 @@
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 0.850;
-//double ROLL_PID_KI = 0.950;
-//double ROLL_PID_KD = 0.011;
-double ROLL_PID_KI = 0;
-double ROLL_PID_KD = 0;
+double ROLL_PID_KP = 0.450;
+double ROLL_PID_KI = 0.950;
+double ROLL_PID_KD = 0.011;
+//double ROLL_PID_KI = 0;
+//double ROLL_PID_KD = 0;
 double ROLL_PID_MIN = -50.0;
 double ROLL_PID_MAX = 50.0;
 
-double PITCH_PID_KP =  0.850;
-//double PITCH_PID_KI = 0.550;
-//double PITCH_PID_KD = 0.011;
-double PITCH_PID_KI = 0;
-double PITCH_PID_KD = 0;
+double PITCH_PID_KP =  0.450;
+double PITCH_PID_KI = 0.950;
+double PITCH_PID_KD = 0.011;
+//double PITCH_PID_KI = 0;
+//double PITCH_PID_KD = 0;
 double PITCH_PID_MIN = -50.0;
 double PITCH_PID_MAX = 50.0;
 
@@ -40,9 +40,9 @@ int PIDyaw_val;
 int PIDalt_val;
 
 //Values to try to achieve
-int setY;
-int setP;
-int setR;
+int setY = 0;
+int setP = 0;
+int setR = 0;
 
 ///////////
 //MPU6050//
@@ -86,7 +86,9 @@ int bluetoothInt;
 char bluetoothChar;
 
 int pIndex = -1;
-int rIndex = -1;
+int iIndex = -1;
+int dIndex = -1;
+int endIndex = -1;
 int tIndex = -1;
 
 ///////////////////

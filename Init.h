@@ -1,7 +1,7 @@
 
 void PID_init(){
   Serial.println("Roll");
-  String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KI) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
+  String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
   Serial.println(output);
   Serial.println("Pitch");
   output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
@@ -122,11 +122,15 @@ void initMPU(){
     Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
 
-     // supply your own gyro offsets here, scaled for min sensitivity
-    mpu.setXGyroOffset(220);
-    mpu.setYGyroOffset(76);
-    mpu.setZGyroOffset(-85);
-    mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
+//Your offsets:  1773  869 1049  26  -34 26
+
+//For my own chip
+    mpu.setXGyroOffset(26);
+    mpu.setYGyroOffset(-34);
+    mpu.setZGyroOffset(26);
+    mpu.setXAccelOffset(1773);
+    mpu.setYAccelOffset(869);
+    mpu.setZAccelOffset(1049);
 
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
