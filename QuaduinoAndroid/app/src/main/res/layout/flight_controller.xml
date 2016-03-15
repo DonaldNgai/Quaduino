@@ -103,7 +103,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0.25"
-                            android:id="@+id/textView9"
+                            android:id="@+id/Y_P_label"
                             android:layout_gravity="center"
                             android:textColor="#ffffff" />
                     </LinearLayout>
@@ -146,7 +146,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:id="@+id/textView5"
+                            android:id="@+id/Y_I_label"
                             android:layout_gravity="center"
                             android:textColor="#ffffff"/>
                     </LinearLayout>
@@ -189,7 +189,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:id="@+id/textView3"
+                            android:id="@+id/Y_D_label"
                             android:layout_gravity="center"
                             android:textColor="#ffffff"/>
                     </LinearLayout>
@@ -258,7 +258,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0.25"
-                            android:id="@+id/textView2"
+                            android:id="@+id/RP_P_label"
                             android:layout_gravity="center"
                             android:textColor="#ffffff" />
                     </LinearLayout>
@@ -301,7 +301,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:id="@+id/textView6"
+                            android:id="@+id/RP_I_label"
                             android:layout_gravity="center"
                             android:textColor="#ffffff"/>
                     </LinearLayout>
@@ -344,7 +344,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:id="@+id/textView7"
+                            android:id="@+id/RP_D_label"
                             android:layout_gravity="center"
                             android:textColor="#ffffff"/>
                     </LinearLayout>
@@ -372,7 +372,9 @@
                 android:text="Arm"
                 android:id="@+id/arm_checkbox"
                 android:layout_gravity="center_horizontal"
-                android:checked="false" />
+                android:checked="false"
+                android:textColor="#ffffff"
+                android:buttonTint="#ffffff" />
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -380,7 +382,9 @@
                 android:text="Begin"
                 android:id="@+id/begin_checkbox"
                 android:layout_gravity="center_horizontal"
-                android:checked="false" />
+                android:checked="false"
+                android:textColor="#ffffff"
+                android:buttonTint="#ffffff" />
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -388,7 +392,9 @@
                 android:text="Control"
                 android:id="@+id/control_checkbox"
                 android:layout_gravity="center_horizontal"
-                android:checked="false" />
+                android:checked="false"
+                android:textColor="#ffffff"
+                android:buttonTint="#ffffff" />
 
         </LinearLayout>
 
@@ -418,22 +424,28 @@
 
                 <Button
                     android:layout_width="46dp"
+                    android:maxWidth="46dp"
                     android:layout_height="wrap_content"
-                    android:text="+"
-                    android:id="@+id/increase_throttle" />
+                    android:text="-"
+                    android:id="@+id/decrease_throttle"
+                    android:onClick="subThrottle" />
 
                 <SeekBar
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/throttle_bar"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_weight="3"
+                    android:layout_gravity="center_vertical"
+                    android:splitTrack="false" />
 
                 <Button
                     android:layout_width="46dp"
+                    android:maxWidth="46dp"
                     android:layout_height="wrap_content"
-                    android:text="-"
-                    android:id="@+id/decrease_throttle" />
+                    android:text="+"
+                    android:id="@+id/increase_throttle"
+                    android:onClick="addThrottle" />
+
             </TableRow>
         </TableLayout>
 
@@ -448,24 +460,50 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Calibrate"
-            android:id="@+id/calibrate_button"
+            android:text="Calibrate Phone"
+            android:id="@+id/calibrate_phone"
             android:layout_gravity="center_vertical" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Calibrate Drone"
+            android:id="@+id/calibrate_drone" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Main Menu"
             android:id="@+id/main_menu_button"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:onClick="finish" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Reset PID"
             android:id="@+id/reset_button"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:onClick="resetPID" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Debug"
+            android:id="@+id/debug_button"
+            android:onClick="debug" />
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/debut_text"
+        android:maxHeight="250dp"
+        android:background="#ffffff"
+        android:textColor="#000000"
+        android:visibility="invisible" />
 
 </FrameLayout>

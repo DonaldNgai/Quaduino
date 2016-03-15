@@ -53,21 +53,6 @@ public class FullscreenActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_fullscreen);
 
-        mVisible = true;
-
-        // Set up the user interaction to manually show or hide the system UI.
-//        mContentView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                toggle();
-//            }
-//        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-//        findViewById(R.id.f).setOnTouchListener(mDelayHideTouchListener);
-
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         devicelist = (ListView)findViewById(R.id.bluetooth_list);
@@ -120,6 +105,7 @@ public class FullscreenActivity extends AppCompatActivity {
             // Get the device MAC address, the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
+
             // Make an intent to start next activity.
             Intent i = new Intent(FullscreenActivity.this, Flight_Controller.class);
             //Change the activity.
