@@ -5,4 +5,6 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="title_activity_flight__controller">Flight_Controller</string>
+
+    <string name="title_activity_fullscreen1">FullscreenActivity1</string>
 </resources>

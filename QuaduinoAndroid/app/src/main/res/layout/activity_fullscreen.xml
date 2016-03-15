@@ -10,22 +10,15 @@
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
 
-    <ListView
-        android:layout_width="190dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/bluetooth_list"
-        android:layout_gravity="right|center_vertical"
-        android:choiceMode="singleChoice" />
-
     <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal|top">
 
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center">
+            android:layout_gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -36,10 +29,33 @@
                 android:textColor="#ffffff"
                 android:layout_weight="1"
                 android:editable="false"
-                android:layout_column="2"
+                android:layout_column="0"
                 android:layout_gravity="center"
                 android:gravity="center" />
         </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <ListView
+                android:layout_width="190dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/bluetooth_list"
+                android:layout_gravity="center"
+                android:choiceMode="singleChoice"
+                android:smoothScrollbar="true"
+                tools:listitem="@android:layout/simple_list_item_1"
+                android:clickable="true"
+                android:background="#ffffff" />
+        </TableRow>
+    </TableLayout>
+
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom">
 
         <TableRow
             android:layout_width="match_parent"
@@ -59,7 +75,8 @@
                 android:text="Turn On Bluetooth"
                 android:id="@+id/on_bluetooth"
                 android:onClick="on"
-                android:layout_column="2" />
+                android:layout_column="2"
+                android:clickable="true" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -67,7 +84,8 @@
                 android:text="Find Bluetooth Devices"
                 android:id="@+id/find_bluetooth"
                 android:layout_column="3"
-                android:onClick="findBluetooth" />
+                android:onClick="findBluetooth"
+                android:clickable="true" />
 
         </TableRow>
 

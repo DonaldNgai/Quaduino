@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.donald.quaduinoflightcontrol" >
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,7 +14,7 @@
             android:name=".FullscreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:screenOrientation="landscape"
+            android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,12 +26,18 @@
             android:name=".Flight_Controller"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_flight__controller"
-            android:screenOrientation="landscape"
             android:parentActivityName=".FullscreenActivity"
+            android:screenOrientation="landscape"
             android:theme="@style/FullscreenTheme" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.donald.quaduinoflightcontrol.FullscreenActivity" />
+        </activity>
+        <activity
+            android:name=".FullscreenActivity1"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen1"
+            android:theme="@style/FullscreenTheme" >
         </activity>
     </application>
 

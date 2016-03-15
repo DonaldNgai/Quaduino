@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -43,10 +44,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private boolean mVisible;
     private BluetoothAdapter mBluetoothAdapter;
     private Set<BluetoothDevice> pairedDevices;
-    private ArrayList list = new ArrayList();
-    ListView devicelist;
     public static final String EXTRA_ADDRESS = "address";
-
+    ListView devicelist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +86,8 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     public void findBluetooth(View v){
+        List<String> list = new ArrayList<String>();
+
         if (!mBluetoothAdapter.isEnabled()) {
             int REQUEST_ENABLE_BT = 0;
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -107,7 +108,7 @@ public class FullscreenActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
         }
 
-        final ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, list);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, list);
         devicelist.setAdapter(adapter);
         devicelist.setOnItemClickListener(myListClickListener); //Method called when the device from the list is clicked
     }
