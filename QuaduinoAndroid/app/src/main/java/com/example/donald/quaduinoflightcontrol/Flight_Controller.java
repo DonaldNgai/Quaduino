@@ -24,6 +24,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
+//TODO calibrate drone button
+//TODO receive data
+//TODO send data at frequency
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -45,7 +48,11 @@ public class Flight_Controller extends AppCompatActivity {
     volatile boolean sensorThreadRunning = true;
     Handler bluetoothIn;
 
-    public float[] phoneOrientation;
+    public float[] phoneOrientation = new float[3];
+    public float[] calibratedPhoneOrientation = new float[3];
+    //Values to help with calibration
+    public float cYaw,cPitch,cRoll = 0;
+
     public double RP_P = 0;
     public double RP_I = 0;
     public double RP_D = 0;
@@ -344,6 +351,7 @@ public class Flight_Controller extends AppCompatActivity {
         }
 
         private void update(float[] vectors) {
+            //TODO MAKE SURE VALUES ARE CORRECT!
             float[] rotationMatrix = new float[9];
             SensorManager.getRotationMatrixFromVector(rotationMatrix, vectors);
             int worldAxisX = SensorManager.AXIS_X;
@@ -355,9 +363,12 @@ public class Flight_Controller extends AppCompatActivity {
             float yaw = phoneOrientation[0] = Math.round(orientation[0] * FROM_RADS_TO_DEGS);
             float pitch = phoneOrientation[1] = Math.round(orientation[1] * FROM_RADS_TO_DEGS);
             float roll = phoneOrientation[2] = Math.round(orientation[2] * FROM_RADS_TO_DEGS);
-            ((TextView)findViewById(R.id.phone_yaw)).setText("Yaw: "+yaw);
-            ((TextView)findViewById(R.id.phone_pitch)).setText("Pitch: "+pitch);
-            ((TextView)findViewById(R.id.phone_roll)).setText("Roll: "+roll);
+            calibratedPhoneOrientation[0] = ((yaw + (360 - (cYaw + 180))) % 360) - 180;
+            calibratedPhoneOrientation[1] = cPitch - pitch;
+            calibratedPhoneOrientation[2] = cRoll - roll;
+            ((TextView)findViewById(R.id.phone_yaw)).setText("Yaw: "+ phoneOrientation[0]);
+            ((TextView)findViewById(R.id.phone_pitch)).setText("Pitch: "+ calibratedPhoneOrientation[1]);
+            ((TextView)findViewById(R.id.phone_roll)).setText("Roll: "+ calibratedPhoneOrientation[2]);
         }
 
     }
@@ -379,6 +390,12 @@ public class Flight_Controller extends AppCompatActivity {
 
     public void subThrottle(View v){
         throttleBar.setProgress(throttleBar.getProgress() - THROTTLE_AMOUNT);
+    }
+
+    public void calibratePhone(View v){
+        cYaw = phoneOrientation[0];
+        cPitch = phoneOrientation[1];
+        cRoll = phoneOrientation[2];
     }
 
     public void resetPID(View v){
