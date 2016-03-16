@@ -485,7 +485,7 @@ public class Flight_Controller extends AppCompatActivity {
     }
 
     public void addThrottle(View v){
-        if (armCheck.isChecked())
+        if (armCheck.isChecked() && beginCheck.isChecked())
         throttleBar.setProgress(throttleBar.getProgress() + THROTTLE_AMOUNT);
     }
 
