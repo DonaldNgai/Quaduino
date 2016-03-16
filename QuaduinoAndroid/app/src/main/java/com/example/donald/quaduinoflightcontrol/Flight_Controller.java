@@ -13,8 +13,12 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +51,14 @@ public class Flight_Controller extends AppCompatActivity {
     volatile boolean connectedThreadRunning = true;
     volatile boolean sensorThreadRunning = true;
     Handler bluetoothIn;
+    Handler bluetoothOut;
+    public final int DATA_TRANSMIT_FREQUENCY = 3000;
+
+    public CheckBox beginCheck;
+    public CheckBox armCheck;
+    public CheckBox controlCheck;
+    public TextView debugBox;
+    public boolean doCalibrate;
 
     public float[] phoneOrientation = new float[3];
     public float[] calibratedPhoneOrientation = new float[3];
@@ -75,12 +87,87 @@ public class Flight_Controller extends AppCompatActivity {
 
     public SeekBar throttleBar;
 
+    public Runnable transmitRunnable = new Runnable() {
+        @Override
+        public void run() {
+//            Toast.makeText(getApplicationContext(), "INSIDE", Toast.LENGTH_SHORT).show();
+            sendData();
+            bluetoothOut.postDelayed(this,DATA_TRANSMIT_FREQUENCY);
+        }
+    };
+
+    public void sendData(){
+        //Data string is of the form
+        //Debug,Calibrate,Control,Throttle,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+        //0,1,1,15,23.96,21.29,30.21,3.431,2.231,1.213,3.213,2.213,1.321|
+        //has 63 characters
+        StringBuilder stringBuilder = new StringBuilder(65);
+
+        //Debug
+        if (debugBox.getVisibility() == View.INVISIBLE) stringBuilder.append("0");
+        else stringBuilder.append("1");
+        stringBuilder.append(",");
+
+        //Calibrate
+        if (doCalibrate){ stringBuilder.append("1"); doCalibrate = false;}
+        else {stringBuilder.append("0");}
+        stringBuilder.append(",");
+
+        //Control
+        if (controlCheck.isChecked()) {
+            stringBuilder.append("1");stringBuilder.append(",");
+            stringBuilder.append(calibratedPhoneOrientation[0]);stringBuilder.append(",");
+            stringBuilder.append(calibratedPhoneOrientation[1]);stringBuilder.append(",");
+            stringBuilder.append(calibratedPhoneOrientation[2]);stringBuilder.append(",");
+        }
+        else {
+            stringBuilder.append("0");stringBuilder.append(",");
+            stringBuilder.append("0");stringBuilder.append(",");
+            stringBuilder.append("0");stringBuilder.append(",");
+            stringBuilder.append("0");stringBuilder.append(",");
+        }
+
+        //RP_PID
+        stringBuilder.append(RP_P);stringBuilder.append(",");
+        stringBuilder.append(RP_I);stringBuilder.append(",");
+        stringBuilder.append(RP_D);stringBuilder.append(",");
+
+        //Y_PID
+        stringBuilder.append(Y_P);stringBuilder.append(",");
+        stringBuilder.append(Y_I);stringBuilder.append(",");
+        stringBuilder.append(Y_D);stringBuilder.append("|");
+
+        //TODO UNCOMMENT THIS
+//        mConnectedThread.write(stringBuilder.toString());
+        mConnectedThread.write("x");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.flight_controller);
         throttleBar = (SeekBar)findViewById(R.id.throttle_bar);
+        beginCheck = (CheckBox)findViewById(R.id.begin_checkbox);
+        armCheck = (CheckBox)findViewById(R.id.arm_checkbox);
+        controlCheck = (CheckBox)findViewById(R.id.control_checkbox);
+        debugBox = (TextView)findViewById(R.id.debut_text);
+        debugBox.setMovementMethod(new ScrollingMovementMethod());
+
+        beginCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+              @Override
+              public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                  if (isChecked) {
+                      bluetoothOut = new Handler();
+                      bluetoothOut.postDelayed(transmitRunnable, DATA_TRANSMIT_FREQUENCY);
+                  } else {
+                      bluetoothOut.removeCallbacks(transmitRunnable);
+                  }
+              }
+          }
+        );
 
         mControlsView = getWindow().getDecorView();
         mControlsView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
@@ -129,7 +216,15 @@ public class Flight_Controller extends AppCompatActivity {
                 if (msg.what == handlerState)
                 {                                     //if message is what we want
                     String readMessage = (String) msg.obj;                                                                // msg.arg1 = bytes from connect thread
-                    recDataString.append(readMessage);                                      //keep appending to string until ~
+//                    Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_SHORT).show();
+                    debugBox.append(readMessage);
+                    final int scrollAmount = debugBox.getLayout().getLineTop(debugBox.getLineCount()) - debugBox.getHeight();
+                    // if there is no need to scroll, scrollAmount will be <=0
+                    if (scrollAmount > 0)
+                        debugBox.scrollTo(0, scrollAmount);
+                    else
+                        debugBox.scrollTo(0, 0);
+//                    recDataString.append(readMessage);                                      //keep appending to string until ~
 //                int endOfLineIndex = recDataString.indexOf("~");                    // determine the end-of-line
 //                if (endOfLineIndex > 0) {                                           // make sure there data before ~
 //                    String dataInPrint = recDataString.substring(0, endOfLineIndex);    // extract string
@@ -149,7 +244,7 @@ public class Flight_Controller extends AppCompatActivity {
 //                        sensorView2.setText(" Sensor 2 Voltage = " + sensor2 + "V");
 //                        sensorView3.setText(" Sensor 3 Voltage = " + sensor3 + "V");
 //                    }
-                    recDataString.delete(0, recDataString.length());                    //clear all string data
+//                    recDataString.delete(0, recDataString.length());                    //clear all string data
                     // strIncom =" ";
 //                    dataInPrint = " ";
 //                }
@@ -374,6 +469,8 @@ public class Flight_Controller extends AppCompatActivity {
     }
 
     /////////////Buttons////////////
+    public void calibrateDrone(View v){ doCalibrate = true; }
+
     public void finish(View v){
         finish();
     }

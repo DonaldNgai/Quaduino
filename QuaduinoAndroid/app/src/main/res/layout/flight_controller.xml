@@ -469,7 +469,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Calibrate Drone"
-            android:id="@+id/calibrate_drone" />
+            android:id="@+id/calibrate_drone"
+            android:onClick="calibrateDrone" />
 
         <Button
             android:layout_width="wrap_content"
@@ -500,11 +501,12 @@
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Small Text"
         android:id="@+id/debut_text"
         android:maxHeight="250dp"
         android:background="#ffffff"
         android:textColor="#000000"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:maxLines="15"
+        android:scrollbars="vertical"/>
 
 </FrameLayout>
