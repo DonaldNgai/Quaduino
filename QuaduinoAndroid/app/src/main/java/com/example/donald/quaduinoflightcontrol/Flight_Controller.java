@@ -127,6 +127,9 @@ public class Flight_Controller extends AppCompatActivity {
             stringBuilder.append("0");stringBuilder.append(",");
         }
 
+        //Throttle
+        stringBuilder.append(throttleBar.getProgress());stringBuilder.append(",");
+
         //RP_PID
         stringBuilder.append(RP_P);stringBuilder.append(",");
         stringBuilder.append(RP_I);stringBuilder.append(",");
@@ -482,6 +485,7 @@ public class Flight_Controller extends AppCompatActivity {
     }
 
     public void addThrottle(View v){
+        if (armCheck.isChecked())
         throttleBar.setProgress(throttleBar.getProgress() + THROTTLE_AMOUNT);
     }
 
