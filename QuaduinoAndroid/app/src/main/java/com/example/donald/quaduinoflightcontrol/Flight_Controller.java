@@ -58,6 +58,7 @@ public class Flight_Controller extends AppCompatActivity {
     public CheckBox armCheck;
     public CheckBox controlCheck;
     public TextView debugBox;
+    public TextView stableText;
     public boolean doCalibrate;
 
     public float[] phoneOrientation = new float[3];
@@ -75,7 +76,7 @@ public class Flight_Controller extends AppCompatActivity {
     public final double RP_P_FINAL = 0.25;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
-    public final double Y_P_FINAL = 0.25;
+    public final double Y_P_FINAL = 0;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
     public final double RP_P_AMOUNT = 0.01;
@@ -141,8 +142,8 @@ public class Flight_Controller extends AppCompatActivity {
         stringBuilder.append(Y_D);stringBuilder.append("|");
 
         //TODO UNCOMMENT THIS
-//        mConnectedThread.write(stringBuilder.toString());
-        mConnectedThread.write("x");
+        mConnectedThread.write(stringBuilder.toString());
+//        mConnectedThread.write("x");
     }
 
     @Override
@@ -156,6 +157,7 @@ public class Flight_Controller extends AppCompatActivity {
         armCheck = (CheckBox)findViewById(R.id.arm_checkbox);
         controlCheck = (CheckBox)findViewById(R.id.control_checkbox);
         debugBox = (TextView)findViewById(R.id.debut_text);
+        stableText = (TextView)findViewById(R.id.stableText);
         debugBox.setMovementMethod(new ScrollingMovementMethod());
 
         beginCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -219,38 +221,16 @@ public class Flight_Controller extends AppCompatActivity {
                 if (msg.what == handlerState)
                 {                                     //if message is what we want
                     String readMessage = (String) msg.obj;                                                                // msg.arg1 = bytes from connect thread
-//                    Toast.makeText(getApplicationContext(), readMessage, Toast.LENGTH_SHORT).show();
                     debugBox.append(readMessage);
+                    if (readMessage == "Stable"){
+                        stableText.setText("MPU is stable!");
+                    }
                     final int scrollAmount = debugBox.getLayout().getLineTop(debugBox.getLineCount()) - debugBox.getHeight();
                     // if there is no need to scroll, scrollAmount will be <=0
                     if (scrollAmount > 0)
                         debugBox.scrollTo(0, scrollAmount);
                     else
                         debugBox.scrollTo(0, 0);
-//                    recDataString.append(readMessage);                                      //keep appending to string until ~
-//                int endOfLineIndex = recDataString.indexOf("~");                    // determine the end-of-line
-//                if (endOfLineIndex > 0) {                                           // make sure there data before ~
-//                    String dataInPrint = recDataString.substring(0, endOfLineIndex);    // extract string
-//                    txtString.setText("Data Received = " + dataInPrint);
-//                    int dataLength = dataInPrint.length();                          //get length of data received
-//                    txtStringLength.setText("String Length = " + String.valueOf(dataLength));
-//
-//                    if (recDataString.charAt(0) == '#')                             //if it starts with # we know it is what we are looking for
-//                    {
-//                        String sensor0 = recDataString.substring(1, 5);             //get sensor value from string between indices 1-5
-//                        String sensor1 = recDataString.substring(6, 10);            //same again...
-//                        String sensor2 = recDataString.substring(11, 15);
-//                        String sensor3 = recDataString.substring(16, 20);
-//
-//                        sensorView0.setText(" Sensor 0 Voltage = " + sensor0 + "V");    //update the textviews with sensor values
-//                        sensorView1.setText(" Sensor 1 Voltage = " + sensor1 + "V");
-//                        sensorView2.setText(" Sensor 2 Voltage = " + sensor2 + "V");
-//                        sensorView3.setText(" Sensor 3 Voltage = " + sensor3 + "V");
-//                    }
-//                    recDataString.delete(0, recDataString.length());                    //clear all string data
-                    // strIncom =" ";
-//                    dataInPrint = " ";
-//                }
                 }
             }
         };
