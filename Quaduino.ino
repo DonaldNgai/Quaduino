@@ -33,64 +33,102 @@ void setup() {
 // ===                    SUPPORTING FUNCTIONS                     ===
 // ===================================================================
 
-void getThrottleValue(){
-  
-   if (Serial.available()) {
-    
-    while(Serial.available()){
-      delay(3);
-      bluetoothChar = Serial.read();
-      bluetoothString += bluetoothChar; 
+bool receivedAll = false;
+bool debug = false;
+bool control = false;
+bool calibrate = false;
+int commaIndex = -1;
+String temp = "";
+
+void updateIndexes(){
+  endIndex = bluetoothString.length() - 1;
+  commaIndex = bluetoothString.indexOf(',');
+  temp = bluetoothString.substring(0,commaIndex);  
+  bluetoothString = bluetoothString.substring(commaIndex,endIndex);
+}
+
+void processString(){
+//Debug,Calibrate,Control,Throttle,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+//,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
+  int bluetoothInt;
+
+  if (debug)Serial.println("Length: " + String(bluetoothString.length()) + " " + bluetoothString);
+  if (bluetoothString.length() < 50){
+    //Debug
+    updateIndexes();
+    if (temp == "1") debug = true;
+    else debug = false;
+
+    //Calibrate
+    updateIndexes();
+    if (temp == "1") calibrate = true;
+    else calibrate = false;
+
+    //Control
+    updateIndexes();
+    if (temp == "1") {
+      control = true;
+      setY = yprdegree[0];
+        setP = yprdegree[1];
+        setR = yprdegree[2];
+      }
+    else {
+      if (control == true){
+        //TODO SAVE CALIBRATE VALUE AND SET IT HERE
+        setY = 0;
+        setP = 0;
+        setR = 0;
+        }
+      control = false;}
+
+    //Throttle
+    updateIndexes();
+    bluetoothInt = temp.toInt();
+    if (bluetoothInt <= 100 && bluetoothInt >= 0){
+      throttle = map(bluetoothInt,0,100,620,765);
     }
-//  Serial.println(bluetoothString);
 
-  char floatbuf[32]; // make this at least big enough for the whole string
-  String num;
-  
-   pIndex = bluetoothString.indexOf('P');
-   iIndex = bluetoothString.indexOf('I');
-   dIndex = bluetoothString.indexOf('D');
-   endIndex = bluetoothString.indexOf('|');
-   tIndex = bluetoothString.indexOf('t');
+    //Phone yaw pitch roll
+    if (calibrate){
+      updateIndexes();
+      setY = temp.toInt();
+      updateIndexes();
+      setP = temp.toInt();
+      updateIndexes();
+      setR = temp.toInt();
+    }
+    else{
+      updateIndexes();
+      updateIndexes();
+      updateIndexes();
+    }
 
-   if (tIndex == 0 && pIndex < 0 && iIndex < 0 && dIndex < 0){
-       bluetoothString.remove(0,1);
-       tIndex = bluetoothString.indexOf('t');
-        if (tIndex > 0)
-        {
-          bluetoothInt = bluetoothString.substring(0,tIndex).toInt();
-        }
-        else
-        {
-          bluetoothInt = bluetoothString.substring(0).toInt();
-        }
-       if (bluetoothInt <= 100 && bluetoothInt >= 0){
-          throttle = map(bluetoothInt,0,100,620,765);
-        }
-      }        
-      
-     else if (endIndex > 0){
-        num = bluetoothString.substring(2,endIndex);
-//        Serial.println(num);
-        num.toCharArray(floatbuf, sizeof(floatbuf));
-        double toChange = atof(floatbuf);
-//        Serial.println(toChange);
-        if(pIndex == 0){
-          ROLL_PID_KP = toChange;
-          PITCH_PID_KP = toChange;
-        }
-        else if (iIndex == 0){
-          ROLL_PID_KI = toChange;
-          PITCH_PID_KI = toChange;
-        }
-        else if (dIndex == 0){
-          ROLL_PID_KD = toChange;
-          PITCH_PID_KD = toChange;
-        }
-                  //                          Kp,        Ki,         Kd           Lval         Hval
-        PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
-        PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
-        PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
+    //Roll and Pitch PID
+    updateIndexes();
+    ROLL_PID_KP = temp.toInt();
+    PITCH_PID_KP = temp.toInt();
+    updateIndexes();
+    ROLL_PID_KI = temp.toInt();
+    PITCH_PID_KI = temp.toInt();
+    updateIndexes();
+    ROLL_PID_KI = temp.toInt();
+    PITCH_PID_KI = temp.toInt();
+
+    //YAW PID
+    updateIndexes();
+    YAW_PID_KP = temp.toInt();
+    updateIndexes();
+    YAW_PID_KI = temp.toInt();
+    updateIndexes();
+    YAW_PID_KI = temp.toInt();
+
+    //SET PID
+    //                  //                          Kp,        Ki,         Kd           Lval         Hval
+    PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
+    PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
+    PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
+
+    if (debug){
         Serial.println("Roll");
         String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
         Serial.println(output);
@@ -100,21 +138,102 @@ void getThrottleValue(){
         Serial.println("Yaw");
         output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
         Serial.println(output);
-      }
-      
+    }
+
+    //reset
+    endIndex = 0;
+    commaIndex = 0;
+    temp = "";
+    bluetoothString = "";
+  }
+  char floatbuf[32]; // make this at least big enough for the whole string
+  String num;
+  
+//   pIndex = bluetoothString.indexOf('P');
+//   iIndex = bluetoothString.indexOf('I');
+//   dIndex = bluetoothString.indexOf('D');
+//   endIndex = bluetoothString.indexOf('|');
+//   tIndex = bluetoothString.indexOf('t');
+//
+//   if (tIndex == 0 && pIndex < 0 && iIndex < 0 && dIndex < 0){
+//       bluetoothString.remove(0,1);
+//       tIndex = bluetoothString.indexOf('t');
+//        if (tIndex > 0)
+//        {
+//          bluetoothInt = bluetoothString.substring(0,tIndex).toInt();
+//        }
+//        else
+//        {
+//          bluetoothInt = bluetoothString.substring(0).toInt();
+//        }
+//       if (bluetoothInt <= 100 && bluetoothInt >= 0){
+//          throttle = map(bluetoothInt,0,100,620,765);
+//        }
+//      }        
+//      
+//     else if (endIndex > 0){
+//        num = bluetoothString.substring(2,endIndex);
+////        Serial.println(num);
+//        num.toCharArray(floatbuf, sizeof(floatbuf));
+//        double toChange = atof(floatbuf);
+////        Serial.println(toChange);
+//        if(pIndex == 0){
+//          ROLL_PID_KP = toChange;
+//          PITCH_PID_KP = toChange;
+//        }
+//        else if (iIndex == 0){
+//          ROLL_PID_KI = toChange;
+//          PITCH_PID_KI = toChange;
+//        }
+//        else if (dIndex == 0){
+//          ROLL_PID_KD = toChange;
+//          PITCH_PID_KD = toChange;
+//        }
+//                  //                          Kp,        Ki,         Kd           Lval         Hval
+//        PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
+//        PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
+//        PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
+//        Serial.println("Roll");
+//        String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
+//        Serial.println(output);
+//        Serial.println("Pitch");
+//        output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
+//        Serial.println(output);
+//        Serial.println("Yaw");
+//        output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
+//        Serial.println(output);
+//      }
+//      
       
     bluetoothString = "";
+    receivedAll = false;
+}
+
+
+
+void getBluetoothData(){
+   if (Serial.available()) {
+    while(Serial.available()){
+      mpu.resetFIFO();
+      bluetoothChar = Serial.read();
+//      if (!receivedAll)
+      bluetoothString += bluetoothChar; 
+      
+      if(bluetoothChar == '|'){processString();receivedAll = true;}
+      else {receivedAll = false;}
+    }
+  
   }
    
 }
 
 void getPIDValues(){
-  setY = 0;
+//  setY = 0;
 //  setP = 1.48;
 //  setR = 0.26;
   
 //  PIDyaw_val= (int)PIDyaw.Compute((float)setY-yprdegree[0]);
-  PIDyaw_val = 0;
+  PIDyaw_val = (int)PIDyaw.Compute((float)setY-digitalSmooth(yprdegree[0],yawSmoothArray));
   PIDpitch_val= (int)PIDpitch.Compute((float)setP-digitalSmooth(yprdegree[1],pitchSmoothArray));
   PIDroll_val= (int)PIDroll.Compute((float)setR-digitalSmooth(yprdegree[2],rollSmoothArray));
 
@@ -144,7 +263,7 @@ void adjustMotors(){
   else if (m4_val < MOTOR_RUN_LEVEL) m4_val = MOTOR_RUN_LEVEL;
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
-//  #ifdef debug
+//  if(debug){
 //  Serial.print("Y: ");
 //  Serial.print(yprdegree[0]);
 //  Serial.print(", P: ");
@@ -165,7 +284,7 @@ void adjustMotors(){
 //  Serial.print(PIDpitch_val);
 //  Serial.print(", R: ");
 //  Serial.println(PIDroll_val);
-//#endif
+//}
 
   analogWrite(MOTOR1,m1_val);
   analogWrite(MOTOR2,m2_val);
@@ -177,33 +296,32 @@ void updateSensors() {
     double a,P;
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
-      
     // wait for MPU interrupt or extra packet(s) available
-    do {
-        #ifdef BMP
-      P = getPressure();
-      a = pressure.altitude(P,baseline);
-        Serial.print("relative altitude: ");
-        if (a >= 0.0) Serial.print(" "); // add a space for positive numbers
-        if (a <= 0.0) a = 0;
-        Serial.print(a,1);
-        Serial.print(" meters, ");
-        if (a >= 0.0) Serial.print(" "); // add a space for positive numbers
-        Serial.print(a*3.28084,0);
-        Serial.println(" feet");
-      #endif
-    }
-    while (!mpuInterrupt && fifoCount < packetSize);
-
+//    do {
+//        #ifdef BMP
+//      P = getPressure();
+//      a = pressure.altitude(P,baseline);
+//        Serial.print("relative altitude: ");
+//        if (a >= 0.0) Serial.print(" "); // add a space for positive numbers
+//        if (a <= 0.0) a = 0;
+//        Serial.print(a,1);
+//        Serial.print(" meters, ");
+//        if (a >= 0.0) Serial.print(" "); // add a space for positive numbers
+//        Serial.print(a*3.28084,0);
+//        Serial.println(" feet");
+//      #endif
+//    }
+//    while (!mpuInterrupt && fifoCount < packetSize);
+if (mpuInterrupt || mpu.getFIFOCount() > 400){
     // reset interrupt flag and get INT_STATUS byte
     mpuInterrupt = false;
     mpuIntStatus = mpu.getIntStatus();
 
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-
+  
     // check for overflow (this should never happen unless our code is too inefficient)
-    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+    if ((mpuIntStatus & 0x10) || fifoCount >= 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
         Serial.println(F("FIFO overflow!"));
@@ -238,6 +356,7 @@ void updateSensors() {
             
         
     }
+    }
 }
 
 // ================================================================
@@ -247,7 +366,7 @@ void updateSensors() {
 
 void loop(){
   updateSensors();
-  getThrottleValue();
+  getBluetoothData();
   getPIDValues();
   adjustMotors();
 }

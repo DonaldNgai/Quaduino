@@ -17,63 +17,64 @@ void PID_init(){
 //  PIDalt.ChangeParameters(ALT_PID_KP,ALT_PID_KI,ALT_PID_KD,ALT_PID_MIN,ALT_PID_MAX);
 }
 
-void setPIDValues(){
-  bluetoothString = "";
-  digitalWrite(LED_PIN,HIGH);
-  bool done = false;
-  while(!done){
-    while (Serial.available() && bluetoothString.indexOf("end|") < 0){// empty buffer again
-      delay(3);
-      bluetoothChar = Serial.read();
-      bluetoothString += bluetoothChar;
-    } 
-    if (bluetoothString != ""){
-      while(bluetoothString != "")
-      {
-        String sub;
-        String num;
-        int endIndex;
-        endIndex = bluetoothString.indexOf("|");
-        sub = bluetoothString.substring(0,endIndex);
-        bluetoothString.remove(0,endIndex+1);
-        endIndex = sub.indexOf(":");
-        num = sub.substring(endIndex+1);
-        sub = sub.substring(0,endIndex);
-
-        char floatbuf[32]; // make this at least big enough for the whole string
-        num.toCharArray(floatbuf, sizeof(floatbuf));
-        double toChange = atof(floatbuf);
-        
-        if (sub == "YawP"){YAW_PID_KP = toChange;}
-        if (sub == "YawI"){YAW_PID_KI = toChange;}
-        if (sub == "YawD"){YAW_PID_KD = toChange;}
-        if (sub == "YawMax"){YAW_PID_MIN = -toChange;
-                             YAW_PID_MAX = toChange; }
-        if (sub == "PitchP"){PITCH_PID_KP = toChange;}
-        if (sub == "PitchI"){PITCH_PID_KI = toChange;}
-        if (sub == "PitchD"){PITCH_PID_KD = toChange;}
-        if (sub == "PitchMax"){PITCH_PID_MIN = -toChange;
-                               PITCH_PID_MAX = toChange;}
-        if (sub == "RollP"){ROLL_PID_KP = toChange;}
-        if (sub == "RollI"){ROLL_PID_KI = toChange;}
-        if (sub == "RollD"){ROLL_PID_KD = toChange;}
-        if (sub == "RollMax"){ROLL_PID_MIN = -toChange;
-                              ROLL_PID_MAX = toChange;}
-      }
-      done = true;
-      digitalWrite(LED_PIN,LOW);
-    }
-    
-  }
-  bluetoothString="";
-}
+//void setPIDValues(){
+//  bluetoothString = "";
+//  digitalWrite(LED_PIN,HIGH);
+//  bool done = false;
+//  while(!done){
+//    while (Serial.available() && bluetoothString.indexOf("end|") < 0){// empty buffer again
+//      delay(3);
+//      bluetoothChar = Serial.read();
+//      bluetoothString += bluetoothChar;
+//    } 
+//    if (bluetoothString != ""){
+//      while(bluetoothString != "")
+//      {
+//        String sub;
+//        String num;
+//        int endIndex;
+//        endIndex = bluetoothString.indexOf("|");
+//        sub = bluetoothString.substring(0,endIndex);
+//        bluetoothString.remove(0,endIndex+1);
+//        endIndex = sub.indexOf(":");
+//        num = sub.substring(endIndex+1);
+//        sub = sub.substring(0,endIndex);
+//
+//        char floatbuf[32]; // make this at least big enough for the whole string
+//        num.toCharArray(floatbuf, sizeof(floatbuf));
+//        double toChange = atof(floatbuf);
+//        
+//        if (sub == "YawP"){YAW_PID_KP = toChange;}
+//        if (sub == "YawI"){YAW_PID_KI = toChange;}
+//        if (sub == "YawD"){YAW_PID_KD = toChange;}
+//        if (sub == "YawMax"){YAW_PID_MIN = -toChange;
+//                             YAW_PID_MAX = toChange; }
+//        if (sub == "PitchP"){PITCH_PID_KP = toChange;}
+//        if (sub == "PitchI"){PITCH_PID_KI = toChange;}
+//        if (sub == "PitchD"){PITCH_PID_KD = toChange;}
+//        if (sub == "PitchMax"){PITCH_PID_MIN = -toChange;
+//                               PITCH_PID_MAX = toChange;}
+//        if (sub == "RollP"){ROLL_PID_KP = toChange;}
+//        if (sub == "RollI"){ROLL_PID_KI = toChange;}
+//        if (sub == "RollD"){ROLL_PID_KD = toChange;}
+//        if (sub == "RollMax"){ROLL_PID_MIN = -toChange;
+//                              ROLL_PID_MAX = toChange;}
+//      }
+//      done = true;
+//      digitalWrite(LED_PIN,LOW);
+//    }
+//    
+//  }
+//  bluetoothString="";
+//}
 
 void initCommunication()
 {
   // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin();
-        TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
+        
+        TWBR = 12; // 400kHz I2C clock (200kHz if CPU is 8MHz)
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
     #endif
@@ -107,16 +108,8 @@ void initMPU(){
     Serial.println(F("\nSend any character to initialize DMP"));
      while (Serial.available() && Serial.read()); // empty buffer
      while (!Serial.available());                 // wait for data
-     while (Serial.available()){// empty buffer again
-      delay(2);
-      bluetoothChar = Serial.read();
-      bluetoothString += bluetoothChar;
+     while (Serial.available() && Serial.read()){// empty buffer again
     } 
-     
-    if (bluetoothString == "set"){
-      setPIDValues();
-    }
-    bluetoothString = "";
 
     // load and configure the DMP
     Serial.println(F("Initializing DMP..."));
@@ -149,12 +142,15 @@ void initMPU(){
 
         // get expected DMP packet size for later comparison
         packetSize = mpu.dmpGetFIFOPacketSize();
+
+        delay(10000);
+        Serial.println(F("Stable"));
     } else {
         // ERROR!
         // 1 = initial memory load failed
         // 2 = DMP configuration updates failed
         // (if it's going to break, usually the code will be 1)
-        Serial.print(F("DMP Initialization failed (code "));
+        Serial.print(("DMP Initialization failed (code "));
         Serial.print(devStatus);
         Serial.println(F(")"));
     }
