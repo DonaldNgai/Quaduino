@@ -38,6 +38,7 @@ bool debug = false;
 bool control = false;
 bool calibrate = false;
 bool changePID = false;
+
 int commaIndex = -1;
 String temp = "";
 
@@ -49,7 +50,7 @@ void updateIndexes(){
 }
 
 void processString(){
-//Debug,Calibrate,PID,Control,Throttle,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+//Debug,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
 //,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
   int bluetoothInt;
 
@@ -71,6 +72,13 @@ void processString(){
     if (temp == "1") changePID = true;
     else changePID = false;
 
+    //Throttle
+    updateIndexes();
+    bluetoothInt = temp.toInt();
+    if (bluetoothInt <= 100 && bluetoothInt >= 0){
+      throttle = map(bluetoothInt,0,100,620,765);
+    }
+
     //Control
     updateIndexes();
     if (temp == "1") {
@@ -82,27 +90,23 @@ void processString(){
     else {
       if (control == true){
         //TODO SAVE CALIBRATE VALUE AND SET IT HERE
-        setY = 0;
-        setP = 0;
-        setR = 0;
+        setY = prevY;
+        setP = prevP;
+        setR = prevR;
         }
       control = false;}
-
-    //Throttle
-    updateIndexes();
-    bluetoothInt = temp.toInt();
-    if (bluetoothInt <= 100 && bluetoothInt >= 0){
-      throttle = map(bluetoothInt,0,100,620,765);
-    }
 
     //Phone yaw pitch roll
     if (calibrate){
       updateIndexes();
       setY = temp.toInt();
+      prevY = setY;
       updateIndexes();
       setP = temp.toInt();
+      prevP = setP;
       updateIndexes();
       setR = temp.toInt();
+      prevR = setR
     }
     else{
       updateIndexes();
@@ -153,9 +157,9 @@ void processString(){
     PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
     PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
     PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
-    }
-
-    if (debug){
+//    }
+//
+//    if (debug){
         Serial.println("Roll");
         String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
         Serial.println(output);
