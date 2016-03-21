@@ -37,23 +37,25 @@ bool receivedAll = false;
 bool debug = false;
 bool control = false;
 bool calibrate = false;
+bool changePID = false;
 int commaIndex = -1;
 String temp = "";
 
 void updateIndexes(){
-  endIndex = bluetoothString.length() - 1;
+  endIndex = bluetoothString.length();
   commaIndex = bluetoothString.indexOf(',');
   temp = bluetoothString.substring(0,commaIndex);  
-  bluetoothString = bluetoothString.substring(commaIndex,endIndex);
+  bluetoothString = bluetoothString.substring(commaIndex + 1,endIndex);
 }
 
 void processString(){
-//Debug,Calibrate,Control,Throttle,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+//Debug,Calibrate,PID,Control,Throttle,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
 //,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
   int bluetoothInt;
 
-  if (debug)Serial.println("Length: " + String(bluetoothString.length()) + " " + bluetoothString);
-  if (bluetoothString.length() < 50){
+//  if (debug)Serial.println("Length: " + String(bluetoothString.length()) + " " + bluetoothString);
+  //Max length of a string should be 59 but i made it 61 just in case
+  if (bluetoothString.length() < 61){
     //Debug
     updateIndexes();
     if (temp == "1") debug = true;
@@ -63,6 +65,11 @@ void processString(){
     updateIndexes();
     if (temp == "1") calibrate = true;
     else calibrate = false;
+
+    //PID
+    updateIndexes();
+    if (temp == "1") changePID = true;
+    else changePID = false;
 
     //Control
     updateIndexes();
@@ -103,30 +110,50 @@ void processString(){
       updateIndexes();
     }
 
+    char floatbuf[32]; // make this at least big enough for the whole string
+    double toChange = 0.0;
+
     //Roll and Pitch PID
     updateIndexes();
-    ROLL_PID_KP = temp.toInt();
-    PITCH_PID_KP = temp.toInt();
+    temp.toCharArray(floatbuf, sizeof(floatbuf));
+    toChange = atof(floatbuf);
+    ROLL_PID_KP = toChange;
+    PITCH_PID_KP = toChange;
     updateIndexes();
-    ROLL_PID_KI = temp.toInt();
-    PITCH_PID_KI = temp.toInt();
+    temp.toCharArray(floatbuf, sizeof(floatbuf));
+    toChange = atof(floatbuf);
+    ROLL_PID_KI = toChange;
+    PITCH_PID_KI = toChange;
     updateIndexes();
-    ROLL_PID_KI = temp.toInt();
-    PITCH_PID_KI = temp.toInt();
+    temp.toCharArray(floatbuf, sizeof(floatbuf));
+    toChange = atof(floatbuf);
+    ROLL_PID_KD = toChange;
+    PITCH_PID_KD = toChange;
 
     //YAW PID
     updateIndexes();
-    YAW_PID_KP = temp.toInt();
+    temp.toCharArray(floatbuf, sizeof(floatbuf));
+    toChange = atof(floatbuf);
+    YAW_PID_KP = toChange;
     updateIndexes();
-    YAW_PID_KI = temp.toInt();
+    temp.toCharArray(floatbuf, sizeof(floatbuf));
+    toChange = atof(floatbuf);
+    YAW_PID_KI = toChange;
     updateIndexes();
-    YAW_PID_KI = temp.toInt();
+    temp.toCharArray(floatbuf, sizeof(floatbuf));
+    toChange = atof(floatbuf);
+    YAW_PID_KD = toChange;
 
     //SET PID
     //                  //                          Kp,        Ki,         Kd           Lval         Hval
+    if (changePID){
+      PIDroll.resetI();
+      PIDpitch.resetI();
+      PIDyaw.resetI();
     PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
     PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
     PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
+    }
 
     if (debug){
         Serial.println("Roll");
@@ -146,7 +173,6 @@ void processString(){
     temp = "";
     bluetoothString = "";
   }
-  char floatbuf[32]; // make this at least big enough for the whole string
   String num;
   
 //   pIndex = bluetoothString.indexOf('P');
@@ -263,28 +289,28 @@ void adjustMotors(){
   else if (m4_val < MOTOR_RUN_LEVEL) m4_val = MOTOR_RUN_LEVEL;
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
-//  if(debug){
-//  Serial.print("Y: ");
-//  Serial.print(yprdegree[0]);
-//  Serial.print(", P: ");
-//  Serial.print(yprdegree[1]);
-//  Serial.print(", R: ");
-//  Serial.print(yprdegree[2]);
-//  Serial.print(", M1: ");
-//  Serial.print(m1_val);
-//  Serial.print(", M2: ");
-//  Serial.print(m2_val);
-//  Serial.print(", M3: ");
-//  Serial.print(m3_val);
-//  Serial.print(", M4: ");
-//  Serial.println(m4_val);
-//  Serial.print(", Y: ");
-//  Serial.print(PIDyaw_val);
-//  Serial.print(", P: ");
-//  Serial.print(PIDpitch_val);
-//  Serial.print(", R: ");
-//  Serial.println(PIDroll_val);
-//}
+  if(debug){
+  Serial.print("Y: ");
+  Serial.print(yprdegree[0]);
+  Serial.print(", P: ");
+  Serial.print(yprdegree[1]);
+  Serial.print(", R: ");
+  Serial.print(yprdegree[2]);
+  Serial.print(", M1: ");
+  Serial.print(m1_val);
+  Serial.print(", M2: ");
+  Serial.print(m2_val);
+  Serial.print(", M3: ");
+  Serial.print(m3_val);
+  Serial.print(", M4: ");
+  Serial.print(m4_val);
+  Serial.print(", YPID: ");
+  Serial.print(PIDyaw_val);
+  Serial.print(", PPID: ");
+  Serial.print(PIDpitch_val);
+  Serial.print(", RPID: ");
+  Serial.println(PIDroll_val);
+}
 
   analogWrite(MOTOR1,m1_val);
   analogWrite(MOTOR2,m2_val);
@@ -345,13 +371,15 @@ if (mpuInterrupt || mpu.getFIFOCount() > 400){
             yprdegree[0] = (ypr[0] * 180/M_PI);
             yprdegree[1] = (ypr[1] * 180/M_PI);
             yprdegree[2] = (ypr[2] * 180/M_PI);
-            
+//
+//            if (debug){
 //              Serial.print("ypr\t");
 //              Serial.print(ypr[0] * 180/M_PI);
 //              Serial.print("\t");
 //              Serial.print(ypr[1] * 180/M_PI);
 //              Serial.print("\t");
 //              Serial.println(ypr[2] * 180/M_PI);
+//            }
             
             
         
