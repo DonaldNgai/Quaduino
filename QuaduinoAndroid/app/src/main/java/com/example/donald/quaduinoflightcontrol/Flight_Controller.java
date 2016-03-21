@@ -52,7 +52,8 @@ public class Flight_Controller extends AppCompatActivity {
     volatile boolean sensorThreadRunning = true;
     Handler bluetoothIn;
     Handler bluetoothOut;
-    public final int DATA_TRANSMIT_FREQUENCY = 3000;
+    //50 times per second = 50Hz
+    public final int DATA_TRANSMIT_FREQUENCY = 20;
 
     public CheckBox beginCheck;
     public CheckBox armCheck;
@@ -60,6 +61,7 @@ public class Flight_Controller extends AppCompatActivity {
     public TextView debugBox;
     public TextView stableText;
     public boolean doCalibrate;
+    public boolean PIDChanged = false;
 
     public float[] phoneOrientation = new float[3];
     public float[] calibratedPhoneOrientation = new float[3];
@@ -99,7 +101,7 @@ public class Flight_Controller extends AppCompatActivity {
 
     public void sendData(){
         //Data string is of the form
-        //Debug,Calibrate,Control,Throttle,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+        //Debug,Calibrate,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
         //0,1,1,15,23.96,21.29,30.21,3.431,2.231,1.213,3.213,2.213,1.321|
         //has 63 characters
         StringBuilder stringBuilder = new StringBuilder(65);
@@ -114,6 +116,14 @@ public class Flight_Controller extends AppCompatActivity {
         else {stringBuilder.append("0");}
         stringBuilder.append(",");
 
+        //Change PID
+        if (PIDChanged) { stringBuilder.append("1"); PIDChanged = false;}
+        else {stringBuilder.append("0");}
+        stringBuilder.append(",");
+
+        //Throttle
+        stringBuilder.append(throttleBar.getProgress());stringBuilder.append(",");
+
         //Control
         if (controlCheck.isChecked()) {
             stringBuilder.append("1");stringBuilder.append(",");
@@ -127,9 +137,6 @@ public class Flight_Controller extends AppCompatActivity {
             stringBuilder.append("0");stringBuilder.append(",");
             stringBuilder.append("0");stringBuilder.append(",");
         }
-
-        //Throttle
-        stringBuilder.append(throttleBar.getProgress());stringBuilder.append(",");
 
         //RP_PID
         stringBuilder.append(RP_P);stringBuilder.append(",");
@@ -222,7 +229,7 @@ public class Flight_Controller extends AppCompatActivity {
                 {                                     //if message is what we want
                     String readMessage = (String) msg.obj;                                                                // msg.arg1 = bytes from connect thread
                     debugBox.append(readMessage);
-                    if (readMessage == "Stable"){
+                    if (readMessage.contains("Stable")){
                         stableText.setText("MPU is stable!");
                     }
                     final int scrollAmount = debugBox.getLayout().getLineTop(debugBox.getLineCount()) - debugBox.getHeight();
@@ -271,11 +278,6 @@ public class Flight_Controller extends AppCompatActivity {
         mConnectedThread.start();
         mSensorThread = new SensorThread();
         mSensorThread.start();
-
-        //I send a character when resuming.beginning transmission to check device is connected
-        //If it is not an exception will be thrown in the write method and finish() will be called
-        //TODO ADD BACK IN!
-//        mConnectedThread.write("x");
     }
 
     @Override
@@ -296,6 +298,7 @@ public class Flight_Controller extends AppCompatActivity {
         {
             connectedThreadRunning = false;
             sensorThreadRunning = false;
+            bluetoothOut.removeCallbacks(transmitRunnable);
             //Don't leave Bluetooth sockets open when leaving activity
             btSocket.close();
         } catch (IOException e2) {
@@ -500,6 +503,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.add_RP_P).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 RP_P = Math.round((RP_P + RP_P_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.RP_P_label)).setText(String.valueOf(RP_P));
             }
@@ -508,6 +512,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_RP_P).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 RP_P = Math.round((RP_P - RP_P_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.RP_P_label)).setText(String.valueOf(RP_P));
             }
@@ -517,6 +522,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.add_RP_I).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 RP_I = Math.round((RP_I + RP_I_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.RP_I_label)).setText(String.valueOf(RP_I));
             }
@@ -525,6 +531,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_RP_I).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 RP_I = Math.round((RP_I - RP_I_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.RP_I_label)).setText(String.valueOf(RP_I));
             }
@@ -534,6 +541,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.add_RP_D).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 RP_D = Math.round((RP_D + RP_D_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.RP_D_label)).setText(String.valueOf(RP_D));
             }
@@ -542,6 +550,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_RP_D).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 RP_D = Math.round((RP_D - RP_D_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.RP_D_label)).setText(String.valueOf(RP_D));
             }
@@ -551,6 +560,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.add_Y_P).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 Y_P = Math.round((Y_P + Y_P_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.Y_P_label)).setText(String.valueOf(Y_P));
             }
@@ -559,6 +569,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_Y_P).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 Y_P = Math.round((Y_P - Y_P_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.Y_P_label)).setText(String.valueOf(Y_P));
             }
@@ -568,6 +579,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.add_Y_I).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 Y_I = Math.round((Y_I + Y_I_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.Y_I_label)).setText(String.valueOf(Y_I));
             }
@@ -576,6 +588,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_Y_I).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 Y_I = Math.round((Y_I - Y_I_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.Y_I_label)).setText(String.valueOf(Y_I));
             }
@@ -585,6 +598,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.add_Y_D).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 Y_D = Math.round((Y_D + Y_D_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.Y_D_label)).setText(String.valueOf(Y_D));
             }
@@ -593,6 +607,7 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_Y_D).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PIDChanged = true;
                 Y_D = Math.round((Y_D - Y_D_AMOUNT)*1000.0)/1000.0;
                 ((TextView) findViewById(R.id.Y_D_label)).setText(String.valueOf(Y_D));
             }
