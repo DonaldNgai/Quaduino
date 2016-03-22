@@ -36,7 +36,8 @@
                 android:text="P:"
                 android:id="@+id/phone_pitch"
                 android:minWidth="20dp"
-                android:textColor="#ffffff"/>
+                android:textColor="#ffffff"
+                android:paddingLeft="5dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -44,7 +45,8 @@
                 android:text="R:"
                 android:id="@+id/phone_roll"
                 android:minWidth="20dp"
-                android:textColor="#ffffff"/>
+                android:textColor="#ffffff"
+                android:paddingLeft="5dp" />
 
         </LinearLayout>
 

@@ -325,7 +325,7 @@ void adjustMotors(){
 //  Serial.print(PIDpitch_val);
 //  Serial.print(", RPID: ");
 //  Serial.println(PIDroll_val);
-  Serial.println("setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+  Serial.println(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
 
 }
 
