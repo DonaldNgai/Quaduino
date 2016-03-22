@@ -36,7 +36,6 @@ void setup() {
 bool receivedAll = false;
 bool debug = false;
 bool control = false;
-bool calibrate = false;
 bool changePID = false;
 
 int commaIndex = -1;
@@ -53,10 +52,13 @@ void processString(){
 //Debug,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
 //,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
   int bluetoothInt;
-
+//  Serial.println(bluetoothString);
 //  if (debug)Serial.println("Length: " + String(bluetoothString.length()) + " " + bluetoothString);
   //Max length of a string should be 59 but i made it 61 just in case
-  if (bluetoothString.length() < 61){
+//  Serial.println ( bluetoothString + " - " + );
+  if (bluetoothString.length() < 61  && 
+  bluetoothString.substring(bluetoothString.length()-1,bluetoothString.length()) == "|"
+  ){
     //Debug
     updateIndexes();
     if (temp == "1") debug = true;
@@ -64,8 +66,32 @@ void processString(){
 
     //Calibrate
     updateIndexes();
-    if (temp == "1") calibrate = true;
-    else calibrate = false;
+    if (temp == "1") {
+        setY = int(yprdegree[0]);
+        setP = int(yprdegree[1]);
+        setR = int(yprdegree[2]);
+        prevY = setY;
+        prevP = setP;
+        prevR = setR;
+
+
+//YPR degree is not updating here for some reason :(
+//  Serial.print("Y: ");
+//  Serial.print(yprdegree[0]);
+//  Serial.print(", P: ");
+//  Serial.print(yprdegree[1]);
+//  Serial.print(", R: ");
+//  Serial.println(yprdegree[2]);
+        }
+        
+    else {      if (control == false){
+        //TODO SAVE CALIBRATE VALUE AND SET IT HERE
+        setY = prevY;
+        setP = prevP;
+        setR = prevR;
+        }
+    }
+
 
     //PID
     updateIndexes();
@@ -81,32 +107,17 @@ void processString(){
 
     //Control
     updateIndexes();
-    if (temp == "1") {
-      control = true;
-      setY = yprdegree[0];
-        setP = yprdegree[1];
-        setR = yprdegree[2];
-      }
-    else {
-      if (control == true){
-        //TODO SAVE CALIBRATE VALUE AND SET IT HERE
-        setY = prevY;
-        setP = prevP;
-        setR = prevR;
-        }
-      control = false;}
+    if (temp == "1") control = true;
+    else control = false;
 
     //Phone yaw pitch roll
-    if (calibrate){
+    if (control){
       updateIndexes();
       setY = temp.toInt();
-      prevY = setY;
       updateIndexes();
       setP = temp.toInt();
-      prevP = setP;
       updateIndexes();
       setR = temp.toInt();
-      prevR = setR;
     }
     else{
       updateIndexes();
@@ -294,7 +305,7 @@ void adjustMotors(){
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
   if(debug){
-  Serial.print("Y: ");
+  Serial.print("Y2: ");
   Serial.print(yprdegree[0]);
   Serial.print(", P: ");
   Serial.print(yprdegree[1]);
@@ -308,12 +319,14 @@ void adjustMotors(){
   Serial.print(m3_val);
   Serial.print(", M4: ");
   Serial.print(m4_val);
-  Serial.print(", YPID: ");
-  Serial.print(PIDyaw_val);
-  Serial.print(", PPID: ");
-  Serial.print(PIDpitch_val);
-  Serial.print(", RPID: ");
-  Serial.println(PIDroll_val);
+//  Serial.print(", YPID: ");
+//  Serial.print(PIDyaw_val);
+//  Serial.print(", PPID: ");
+//  Serial.print(PIDpitch_val);
+//  Serial.print(", RPID: ");
+//  Serial.println(PIDroll_val);
+  Serial.println("setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+
 }
 
   analogWrite(MOTOR1,m1_val);

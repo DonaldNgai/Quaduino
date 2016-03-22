@@ -101,7 +101,7 @@ public class Flight_Controller extends AppCompatActivity {
 
     public void sendData(){
         //Data string is of the form
-        //Debug,Calibrate,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+        //Debug,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
         //0,1,1,15,23.96,21.29,30.21,3.431,2.231,1.213,3.213,2.213,1.321|
         //has 63 characters
         StringBuilder stringBuilder = new StringBuilder(65);
