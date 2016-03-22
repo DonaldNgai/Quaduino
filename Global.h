@@ -43,6 +43,9 @@ int PIDalt_val;
 int setY = 0;
 int setP = 0;
 int setR = 0;
+int prevY = 0;
+int prevP = 0;
+int prevR = 0;
 
 ///////////
 //MPU6050//
