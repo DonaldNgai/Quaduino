@@ -106,7 +106,7 @@ void processString(){
       prevP = setP;
       updateIndexes();
       setR = temp.toInt();
-      prevR = setR
+      prevR = setR;
     }
     else{
       updateIndexes();
