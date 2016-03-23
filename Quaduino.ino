@@ -67,9 +67,9 @@ void processString(){
     //Calibrate
     updateIndexes();
     if (temp == "1") {
-        setY = int(yprdegree[0]);
-        setP = int(yprdegree[1]);
-        setR = int(yprdegree[2]);
+        setY = yprdegree[0];
+        setP = yprdegree[1];
+        setR = yprdegree[2];
         prevY = setY;
         prevP = setP;
         prevR = setR;
@@ -274,9 +274,9 @@ void getPIDValues(){
 //  setR = 0.26;
   
 //  PIDyaw_val= (int)PIDyaw.Compute((float)setY-yprdegree[0]);
-  PIDyaw_val = (int)PIDyaw.Compute((float)setY-digitalSmooth(yprdegree[0],yawSmoothArray));
-  PIDpitch_val= (int)PIDpitch.Compute((float)setP-digitalSmooth(yprdegree[1],pitchSmoothArray));
-  PIDroll_val= (int)PIDroll.Compute((float)setR-digitalSmooth(yprdegree[2],rollSmoothArray));
+  PIDyaw_val = (int)PIDyaw.Compute(setY-digitalSmooth(yprdegree[0],yawSmoothArray));
+  PIDpitch_val= (int)PIDpitch.Compute(setP-digitalSmooth(yprdegree[1],pitchSmoothArray));
+  PIDroll_val= (int)PIDroll.Compute(setR-digitalSmooth(yprdegree[2],rollSmoothArray));
 
 }
 

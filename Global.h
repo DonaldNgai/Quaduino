@@ -40,12 +40,12 @@ int PIDyaw_val;
 int PIDalt_val;
 
 //Values to try to achieve
-int setY = 0;
-int setP = 0;
-int setR = 0;
-int prevY = 0;
-int prevP = 0;
-int prevR = 0;
+float setY = 0;
+float setP = 0;
+float setR = 0;
+float prevY = 0;
+float prevP = 0;
+float prevR = 0;
 
 ///////////
 //MPU6050//

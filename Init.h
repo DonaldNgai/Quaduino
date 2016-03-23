@@ -142,8 +142,9 @@ void initMPU(){
 
         // get expected DMP packet size for later comparison
         packetSize = mpu.dmpGetFIFOPacketSize();
+        Serial.println(F("Waiting for DMP to stablilize"));
 
-        delay(10000);
+        delay(20000);
         Serial.println(F("Stable"));
     } else {
         // ERROR!
