@@ -229,6 +229,9 @@ public class Flight_Controller extends AppCompatActivity {
                 {                                     //if message is what we want
                     String readMessage = (String) msg.obj;                                                                // msg.arg1 = bytes from connect thread
                     debugBox.append(readMessage);
+                    if (debugBox.getLineCount() >= 100){
+                        debugBox.getEditableText().delete(0, debugBox.getLineCount()/2);
+                    }
                     if (readMessage.contains("Stable")){
                         stableText.setText("MPU is stable!");
                     }
