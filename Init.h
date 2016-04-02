@@ -17,57 +17,6 @@ void PID_init(){
 //  PIDalt.ChangeParameters(ALT_PID_KP,ALT_PID_KI,ALT_PID_KD,ALT_PID_MIN,ALT_PID_MAX);
 }
 
-//void setPIDValues(){
-//  bluetoothString = "";
-//  digitalWrite(LED_PIN,HIGH);
-//  bool done = false;
-//  while(!done){
-//    while (Serial.available() && bluetoothString.indexOf("end|") < 0){// empty buffer again
-//      delay(3);
-//      bluetoothChar = Serial.read();
-//      bluetoothString += bluetoothChar;
-//    } 
-//    if (bluetoothString != ""){
-//      while(bluetoothString != "")
-//      {
-//        String sub;
-//        String num;
-//        int endIndex;
-//        endIndex = bluetoothString.indexOf("|");
-//        sub = bluetoothString.substring(0,endIndex);
-//        bluetoothString.remove(0,endIndex+1);
-//        endIndex = sub.indexOf(":");
-//        num = sub.substring(endIndex+1);
-//        sub = sub.substring(0,endIndex);
-//
-//        char floatbuf[32]; // make this at least big enough for the whole string
-//        num.toCharArray(floatbuf, sizeof(floatbuf));
-//        double toChange = atof(floatbuf);
-//        
-//        if (sub == "YawP"){YAW_PID_KP = toChange;}
-//        if (sub == "YawI"){YAW_PID_KI = toChange;}
-//        if (sub == "YawD"){YAW_PID_KD = toChange;}
-//        if (sub == "YawMax"){YAW_PID_MIN = -toChange;
-//                             YAW_PID_MAX = toChange; }
-//        if (sub == "PitchP"){PITCH_PID_KP = toChange;}
-//        if (sub == "PitchI"){PITCH_PID_KI = toChange;}
-//        if (sub == "PitchD"){PITCH_PID_KD = toChange;}
-//        if (sub == "PitchMax"){PITCH_PID_MIN = -toChange;
-//                               PITCH_PID_MAX = toChange;}
-//        if (sub == "RollP"){ROLL_PID_KP = toChange;}
-//        if (sub == "RollI"){ROLL_PID_KI = toChange;}
-//        if (sub == "RollD"){ROLL_PID_KD = toChange;}
-//        if (sub == "RollMax"){ROLL_PID_MIN = -toChange;
-//                              ROLL_PID_MAX = toChange;}
-//      }
-//      done = true;
-//      digitalWrite(LED_PIN,LOW);
-//    }
-//    
-//  }
-//  bluetoothString="";
-//}
-
 void initCommunication()
 {
   // join I2C bus (I2Cdev library doesn't do this automatically)
@@ -146,6 +95,14 @@ void initMPU(){
 
         delay(20000);
         Serial.println(F("Stable"));
+
+        setY = yprdegree[0];
+        setP = yprdegree[1];
+        setR = yprdegree[2];
+        prevY = setY;
+        prevP = setP;
+        prevR = setR;
+        
     } else {
         // ERROR!
         // 1 = initial memory load failed

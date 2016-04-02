@@ -73,25 +73,12 @@ void processString(){
         prevY = setY;
         prevP = setP;
         prevR = setR;
-
-
-//YPR degree is not updating here for some reason :(
-//  Serial.print("Y: ");
-//  Serial.print(yprdegree[0]);
-//  Serial.print(", P: ");
-//  Serial.print(yprdegree[1]);
-//  Serial.print(", R: ");
-//  Serial.println(yprdegree[2]);
-        }
         
-    else {      if (control == false){
-        //TODO SAVE CALIBRATE VALUE AND SET IT HERE
+    else if (control == false){
         setY = prevY;
         setP = prevP;
         setR = prevR;
-        }
     }
-
 
     //PID
     updateIndexes();
@@ -165,21 +152,19 @@ void processString(){
       PIDroll.resetI();
       PIDpitch.resetI();
       PIDyaw.resetI();
-    PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
-    PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
-    PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
-//    }
-//
-//    if (debug){
-        Serial.println("Roll");
-        String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
-        Serial.println(output);
-        Serial.println("Pitch");
-        output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
-        Serial.println(output);
-        Serial.println("Yaw");
-        output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
-        Serial.println(output);
+      PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
+      PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
+      PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
+
+      Serial.println("Roll");
+      String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
+      Serial.println(output);
+      Serial.println("Pitch");
+      output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
+      Serial.println(output);
+      Serial.println("Yaw");
+      output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
+      Serial.println(output);
     }
 
     //reset
@@ -188,63 +173,6 @@ void processString(){
     temp = "";
     bluetoothString = "";
   }
-  String num;
-  
-//   pIndex = bluetoothString.indexOf('P');
-//   iIndex = bluetoothString.indexOf('I');
-//   dIndex = bluetoothString.indexOf('D');
-//   endIndex = bluetoothString.indexOf('|');
-//   tIndex = bluetoothString.indexOf('t');
-//
-//   if (tIndex == 0 && pIndex < 0 && iIndex < 0 && dIndex < 0){
-//       bluetoothString.remove(0,1);
-//       tIndex = bluetoothString.indexOf('t');
-//        if (tIndex > 0)
-//        {
-//          bluetoothInt = bluetoothString.substring(0,tIndex).toInt();
-//        }
-//        else
-//        {
-//          bluetoothInt = bluetoothString.substring(0).toInt();
-//        }
-//       if (bluetoothInt <= 100 && bluetoothInt >= 0){
-//          throttle = map(bluetoothInt,0,100,620,765);
-//        }
-//      }        
-//      
-//     else if (endIndex > 0){
-//        num = bluetoothString.substring(2,endIndex);
-////        Serial.println(num);
-//        num.toCharArray(floatbuf, sizeof(floatbuf));
-//        double toChange = atof(floatbuf);
-////        Serial.println(toChange);
-//        if(pIndex == 0){
-//          ROLL_PID_KP = toChange;
-//          PITCH_PID_KP = toChange;
-//        }
-//        else if (iIndex == 0){
-//          ROLL_PID_KI = toChange;
-//          PITCH_PID_KI = toChange;
-//        }
-//        else if (dIndex == 0){
-//          ROLL_PID_KD = toChange;
-//          PITCH_PID_KD = toChange;
-//        }
-//                  //                          Kp,        Ki,         Kd           Lval         Hval
-//        PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
-//        PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
-//        PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
-//        Serial.println("Roll");
-//        String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
-//        Serial.println(output);
-//        Serial.println("Pitch");
-//        output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
-//        Serial.println(output);
-//        Serial.println("Yaw");
-//        output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
-//        Serial.println(output);
-//      }
-//      
       
     bluetoothString = "";
     receivedAll = false;
@@ -269,9 +197,6 @@ void getBluetoothData(){
 }
 
 void getPIDValues(){
-//  setY = 0;
-//  setP = 1.48;
-//  setR = 0.26;
   
 //  PIDyaw_val= (int)PIDyaw.Compute((float)setY-yprdegree[0]);
   PIDyaw_val = (int)PIDyaw.Compute(setY-digitalSmooth(yprdegree[0],yawSmoothArray));
