@@ -73,7 +73,7 @@ void processString(){
         prevY = setY;
         prevP = setP;
         prevR = setR;
-        
+    }
     else if (control == false){
         setY = prevY;
         setP = prevP;
