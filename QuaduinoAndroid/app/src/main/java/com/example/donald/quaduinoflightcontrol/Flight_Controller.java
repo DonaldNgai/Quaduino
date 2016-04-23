@@ -72,7 +72,7 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_I = 0;
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
-    public final double RP_P_FINAL = 0.25;
+    public final double RP_P_FINAL = 0.4;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
     public final double Y_P_FINAL = 0;

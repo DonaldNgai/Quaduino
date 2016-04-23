@@ -181,27 +181,39 @@ void processString(){
 
 
 void getBluetoothData(){
-   if (Serial.available()) {
-    while(Serial.available()){
-      mpu.resetFIFO();
+   if (Serial.available()) 
+   {
+    while(Serial.available())
+    {
+//      mpu.resetFIFO();
       bluetoothChar = Serial.read();
 //      if (!receivedAll)
       bluetoothString += bluetoothChar; 
       
-      if(bluetoothChar == '|'){processString();receivedAll = true;}
-      else {receivedAll = false;}
+      if(bluetoothChar == '|')
+        {
+        processString();
+//        receivedAll = true;
+        }
+//      else 
+//        {
+////        receivedAll = false;
+//        }
     }
-  
   }
-   
 }
+
+int smoothY,smoothP,smoothR;
 
 void getPIDValues(){
   
 //  PIDyaw_val= (int)PIDyaw.Compute((float)setY-yprdegree[0]);
-  PIDyaw_val = (int)PIDyaw.Compute(setY-digitalSmooth(yprdegree[0],yawSmoothArray));
-  PIDpitch_val= (int)PIDpitch.Compute(setP-digitalSmooth(yprdegree[1],pitchSmoothArray));
-  PIDroll_val= (int)PIDroll.Compute(setR-digitalSmooth(yprdegree[2],rollSmoothArray));
+  smoothY = digitalSmooth(yprdegree[0],yawSmoothArray);
+  smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray);
+  smoothR = digitalSmooth(yprdegree[2],rollSmoothArray);
+  PIDyaw_val = (int)PIDyaw.Compute(setY-smoothY);
+  PIDpitch_val= (int)PIDpitch.Compute(setP-smoothP);
+  PIDroll_val= (int)PIDroll.Compute(setR-smoothR);
 
 }
 
@@ -229,30 +241,14 @@ void adjustMotors(){
   else if (m4_val < MOTOR_RUN_LEVEL) m4_val = MOTOR_RUN_LEVEL;
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
-  if(debug){
-  Serial.print("Y2: ");
-  Serial.print(yprdegree[0]);
-  Serial.print(", P: ");
-  Serial.print(yprdegree[1]);
-  Serial.print(", R: ");
-  Serial.print(yprdegree[2]);
-  Serial.print(", M1: ");
-  Serial.print(m1_val);
-  Serial.print(", M2: ");
-  Serial.print(m2_val);
-  Serial.print(", M3: ");
-  Serial.print(m3_val);
-  Serial.print(", M4: ");
-  Serial.print(m4_val);
-//  Serial.print(", YPID: ");
-//  Serial.print(PIDyaw_val);
-//  Serial.print(", PPID: ");
-//  Serial.print(PIDpitch_val);
-//  Serial.print(", RPID: ");
-//  Serial.println(PIDroll_val);
-  Serial.println(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
-
-}
+// TODO i don't get it but putting in serial print makes the pid controller work but takig it out makes it not work
+//  if(debug){
+  Serial.print("Y2: " + String(yprdegree[0]) + ", P: " + String(yprdegree[1]) + ", R: " + String(yprdegree[2]));
+  Serial.print(", M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
+//  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
+  Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+//  Serial.println(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+//  }
 
   analogWrite(MOTOR1,m1_val);
   analogWrite(MOTOR2,m2_val);
@@ -280,7 +276,8 @@ void updateSensors() {
 //      #endif
 //    }
 //    while (!mpuInterrupt && fifoCount < packetSize);
-if (mpuInterrupt || mpu.getFIFOCount() > 400){
+  if (mpuInterrupt && mpu.getFIFOCount() >= packetSize)
+  {
     // reset interrupt flag and get INT_STATUS byte
     mpuInterrupt = false;
     mpuIntStatus = mpu.getIntStatus();
@@ -289,22 +286,25 @@ if (mpuInterrupt || mpu.getFIFOCount() > 400){
     fifoCount = mpu.getFIFOCount();
   
     // check for overflow (this should never happen unless our code is too inefficient)
-    if ((mpuIntStatus & 0x10) || fifoCount >= 1024) {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
-
-    // otherwise, check for DMP data ready interrupt (this should happen frequently)
-    } else if (mpuIntStatus & 0x02) {
+      if ((mpuIntStatus & 0x10) || fifoCount >= 1024) 
+        {
+          // reset so we can continue cleanly
+          mpu.resetFIFO();
+          Serial.println(F("FIFO overflow!"));
+  
+      // otherwise, check for DMP data ready interrupt (this should happen frequently)
+        } 
+      else if (mpuIntStatus & 0x02) 
+        {
         // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+//        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
 
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
         mpu.resetFIFO();
         // track FIFO count here in case there is > 1 packet available
         // (this lets us immediately read more without waiting for an interrupt)
-        fifoCount -= packetSize;
+//        fifoCount -= packetSize;
         
             // display Euler angles in degrees
             mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -313,19 +313,8 @@ if (mpuInterrupt || mpu.getFIFOCount() > 400){
             yprdegree[0] = (ypr[0] * 180/M_PI);
             yprdegree[1] = (ypr[1] * 180/M_PI);
             yprdegree[2] = (ypr[2] * 180/M_PI);
-//
-//            if (debug){
-//              Serial.print("ypr\t");
-//              Serial.print(ypr[0] * 180/M_PI);
-//              Serial.print("\t");
-//              Serial.print(ypr[1] * 180/M_PI);
-//              Serial.print("\t");
-//              Serial.println(ypr[2] * 180/M_PI);
-//            }
-            
-            
-        
-    }
+
+        }
     }
 }
 
