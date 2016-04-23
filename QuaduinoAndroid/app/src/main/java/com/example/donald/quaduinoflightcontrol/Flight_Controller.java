@@ -28,9 +28,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-//TODO calibrate drone button
-//TODO receive data
-//TODO send data at frequency
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
