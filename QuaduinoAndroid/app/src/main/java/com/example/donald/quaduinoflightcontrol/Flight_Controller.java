@@ -60,10 +60,12 @@ public class Flight_Controller extends AppCompatActivity {
     public boolean doCalibrate;
     public boolean PIDChanged = false;
 
-    public float[] phoneOrientation = new float[3];
+    public float orientation[] = new float[3];
     public float[] calibratedPhoneOrientation = new float[3];
     //Values to help with calibration
-    public float cYaw,cPitch,cRoll = 0;
+    public float cYaw,cRoll = 0;
+    public float cPitch = -90;
+    public float rawYaw,rawRoll,rawPitch = 0;
 
     public double RP_P = 0;
     public double RP_I = 0;
@@ -398,18 +400,24 @@ public class Flight_Controller extends AppCompatActivity {
     private class SensorThread extends Thread implements SensorEventListener{
 
         private SensorManager mSensorManager;
-        private Sensor sensor;
-        private static final int SENSOR_DELAY = 500 * 1000; // 500ms
-        private static final int FROM_RADS_TO_DEGS = -57;
+        Sensor accelerometer;
+        Sensor magnetometer;
+        float[] mGravity;
+        float[] mGeomagnetic;
+//        private static final int SENSOR_DELAY = 500 * 1000; // 500ms
+//        private static final int FROM_RADS_TO_DEGS = -57;
 
         public void run() {
-            mSensorManager = (SensorManager) getSystemService(Activity.SENSOR_SERVICE);
-            sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-            mSensorManager.registerListener(this, sensor, SENSOR_DELAY);
+            mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+            accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+            mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
             // Keep looping to listen for received messages
             while (sensorThreadRunning) {
 
             }
+            mSensorManager.unregisterListener(this);
             return;
         }
 
@@ -418,38 +426,43 @@ public class Flight_Controller extends AppCompatActivity {
             // Do something here if sensor accuracy changes.
         }
 
-        @Override
-        public final void onSensorChanged(SensorEvent event) {
-            if (event.sensor == sensor) {
-                if (event.values.length > 4) {
-                    float[] truncatedRotationVector = new float[4];
-                    System.arraycopy(event.values, 0, truncatedRotationVector, 0, 4);
-                    update(truncatedRotationVector);
-                } else {
-                    update(event.values);
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                mGravity = event.values;
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                mGeomagnetic = event.values;
+            if (mGravity != null && mGeomagnetic != null) {
+                float Rm[] = new float[9];
+                float I[] = new float[9];
+                boolean success = SensorManager.getRotationMatrix(Rm, I, mGravity, mGeomagnetic);
+                if (success) {
+
+                    SensorManager.getOrientation(Rm, orientation);
+
+                    //Pitch is originally ranging from -pi/2 to pi/2 but this if function makes it go from
+                    //-pi to pi
+                    if(mGravity[2]<0)
+                        orientation[1] = (float) (Math.PI - orientation[1]);
+
+                    rawYaw = Math.round(Math.toDegrees(orientation[0]));
+                    //move the pitch from -90 -> 270 to -180 -> 180
+                    rawPitch = Math.round(Math.toDegrees(orientation[1])-90);
+                    rawRoll = Math.round(Math.toDegrees(orientation[2]));
+                    //-180 - 0 - 180
+//                calibratedPhoneOrientation[0] = ((yaw + (360 - (cYaw + 180))) % 360) - 180;
+                    calibratedPhoneOrientation[0] = Math.round((((rawYaw - cYaw) + 180)%360)-180);
+                    //-90 - 0 - 270
+                    calibratedPhoneOrientation[1] = Math.round((((rawPitch - cPitch) + 180)%360)-180);
+                    //-180 - 0 - 180
+                    calibratedPhoneOrientation[2] = Math.round((((rawRoll - cRoll) + 180)%360)-180);
+//                    ((TextView)findViewById(R.id.origY)).setText("Yaw: "+ rawYaw);
+//                    ((TextView)findViewById(R.id.origP)).setText("Pitch: "+ rawPitch);
+//                    ((TextView)findViewById(R.id.origR)).setText("Roll: "+ rawRoll);
+                    ((TextView)findViewById(R.id.phone_yaw)).setText("Yaw: "+ calibratedPhoneOrientation[0]);
+                    ((TextView)findViewById(R.id.phone_pitch)).setText("Pitch: "+ calibratedPhoneOrientation[1]);
+                    ((TextView)findViewById(R.id.phone_roll)).setText("Roll: " + calibratedPhoneOrientation[2]);
                 }
             }
-        }
-
-        private void update(float[] vectors) {
-            //TODO MAKE SURE VALUES ARE CORRECT!
-            float[] rotationMatrix = new float[9];
-            SensorManager.getRotationMatrixFromVector(rotationMatrix, vectors);
-            int worldAxisX = SensorManager.AXIS_X;
-            int worldAxisZ = SensorManager.AXIS_Z;
-            float[] adjustedRotationMatrix = new float[9];
-            SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisX, worldAxisZ, adjustedRotationMatrix);
-            float[] orientation = new float[3];
-            SensorManager.getOrientation(adjustedRotationMatrix, orientation);
-            float yaw = phoneOrientation[0] = Math.round(orientation[0] * FROM_RADS_TO_DEGS);
-            float pitch = phoneOrientation[1] = Math.round(orientation[1] * FROM_RADS_TO_DEGS);
-            float roll = phoneOrientation[2] = Math.round(orientation[2] * FROM_RADS_TO_DEGS);
-            calibratedPhoneOrientation[0] = ((yaw + (360 - (cYaw + 180))) % 360) - 180;
-            calibratedPhoneOrientation[1] = cPitch - pitch;
-            calibratedPhoneOrientation[2] = cRoll - roll;
-            ((TextView)findViewById(R.id.phone_yaw)).setText("Yaw: "+ phoneOrientation[0]);
-            ((TextView)findViewById(R.id.phone_pitch)).setText("Pitch: "+ calibratedPhoneOrientation[1]);
-            ((TextView)findViewById(R.id.phone_roll)).setText("Roll: "+ calibratedPhoneOrientation[2]);
         }
 
     }
@@ -477,9 +490,9 @@ public class Flight_Controller extends AppCompatActivity {
     }
 
     public void calibratePhone(View v){
-        cYaw = phoneOrientation[0];
-        cPitch = phoneOrientation[1];
-        cRoll = phoneOrientation[2];
+        cYaw = rawYaw;
+        cPitch = rawPitch;
+        cRoll = rawRoll;
     }
 
     public void resetPID(View v){
