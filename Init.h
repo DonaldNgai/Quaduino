@@ -134,17 +134,26 @@ void initBMP(){
 }
 
 void initMotors(){
-   //Arm motor
-  pinMode(MOTOR1,OUTPUT);
-  pinMode(MOTOR2,OUTPUT);
-  pinMode(MOTOR3,OUTPUT);
-  pinMode(MOTOR4,OUTPUT);
-  throttle = map(0,0,685,620,765);
+   
+//  pinMode(MOTOR1,OUTPUT);
+//  pinMode(MOTOR2,OUTPUT);
+//  pinMode(MOTOR3,OUTPUT);
+//  pinMode(MOTOR4,OUTPUT);
+  MOTOR1.attach(MOTOR1PIN);
+  MOTOR2.attach(MOTOR2PIN);
+  MOTOR3.attach(MOTOR3PIN);
+  MOTOR4.attach(MOTOR4PIN);
+  //Arm motor
+  throttle = map(0,0,100,0,179);
 
-  analogWrite(MOTOR1,throttle);
-  analogWrite(MOTOR2,throttle);
-  analogWrite(MOTOR3,throttle);
-  analogWrite(MOTOR4,throttle);
+//  analogWrite(MOTOR1,throttle);
+//  analogWrite(MOTOR2,throttle);
+//  analogWrite(MOTOR3,throttle);
+//  analogWrite(MOTOR4,throttle);
+  MOTOR1.write(throttle);
+  MOTOR2.write(throttle);
+  MOTOR3.write(throttle);
+  MOTOR4.write(throttle);
   Serial.println("Now writing minimum output to arm motors.");
 }
 

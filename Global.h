@@ -108,17 +108,26 @@ int m3_val;
 int m4_val;
 
 //Motor Pins
-#define MOTOR1 3
-#define MOTOR2 9
-#define MOTOR3 10
-#define MOTOR4 11
+#define MOTOR1PIN 3
+#define MOTOR2PIN 9
+#define MOTOR3PIN 10
+#define MOTOR4PIN 11
+Servo MOTOR1;
+Servo MOTOR2;
+Servo MOTOR3;
+Servo MOTOR4;
 
 //Motor PWM Levels
-#define MAX_SIGNAL 765
+//#define MAX_SIGNAL 765
+////Minimum Value before motors begin spinning
+//#define MOTOR_RUN_LEVEL 630
+////Value at which motors are not moving
+//#define MOTOR_ZERO_LEVEL 620
+#define MAX_SIGNAL 180
 //Minimum Value before motors begin spinning
-#define MOTOR_RUN_LEVEL 630
+#define MOTOR_RUN_LEVEL 4
 //Value at which motors are not moving
-#define MOTOR_ZERO_LEVEL 620
+#define MOTOR_ZERO_LEVEL 0
 
 /////////////////
 //LED VARIABLES//

@@ -510,7 +510,7 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="151dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/debut_text"
         android:maxHeight="250dp"

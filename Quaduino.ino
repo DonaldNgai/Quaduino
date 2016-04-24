@@ -3,6 +3,7 @@
 #include "I2Cdev.h"
 #include <SFE_BMP180.h>
 #include <Wire.h>
+#include <Servo.h>
 #include "PIDCont.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 #include "Global.h"
@@ -89,7 +90,9 @@ void processString(){
     updateIndexes();
     bluetoothInt = temp.toInt();
     if (bluetoothInt <= 100 && bluetoothInt >= 0){
-      throttle = map(bluetoothInt,0,100,620,765);
+//      throttle = map(bluetoothInt,0,100,620,765);
+        throttle = map(bluetoothInt,0,100,0,179);
+
     }
 
     //Control
@@ -250,10 +253,14 @@ void adjustMotors(){
 //  Serial.println(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
 //  }
 
-  analogWrite(MOTOR1,m1_val);
-  analogWrite(MOTOR2,m2_val);
-  analogWrite(MOTOR3,m3_val);
-  analogWrite(MOTOR4,m4_val);
+    MOTOR1.write(m1_val);
+    MOTOR2.write(m2_val);
+    MOTOR3.write(m3_val);
+    MOTOR4.write(m4_val);
+//  analogWrite(MOTOR1,m1_val);
+//  analogWrite(MOTOR2,m2_val);
+//  analogWrite(MOTOR3,m3_val);
+//  analogWrite(MOTOR4,m4_val);
 }
 
 void updateSensors() {
