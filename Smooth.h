@@ -2,16 +2,14 @@
 // ===                    DATA SMOOTHING FUNCTION                     ===
 // ======================================================================
 
-int digitalSmooth(float rawIn, float *sensSmoothArray){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
+int digitalSmooth(float rawIn, float *sensSmoothArray, int inIndex){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
   int j, k, temp, top, bottom;
   long total;
-  static int i;
  // static int raw[filterSamples];
   static int sorted[filterSamples];
   boolean done;
 
-  i = (i + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  sensSmoothArray[i] = rawIn;                 // input new data into the oldest slot
+  sensSmoothArray[inIndex] = rawIn;                 // input new data into the oldest slot
 
   // Serial.print("raw = ");
 
@@ -32,13 +30,13 @@ int digitalSmooth(float rawIn, float *sensSmoothArray){     // "int *sensSmoothA
     }
   }
 
-/*
-  for (j = 0; j < (filterSamples); j++){    // print the array to debug
-    Serial.print(sorted[j]); 
-    Serial.print("   "); 
-  }
-  Serial.println();
-*/
+
+//  for (j = 0; j < (filterSamples); j++){    // print the array to debug
+//    Serial.print(sorted[j]); 
+//    Serial.print("   "); 
+//  }
+//  Serial.println();
+
 
   // throw out top and bottom 15% of samples - limit to throw out at least one from top and bottom
   bottom = max(((filterSamples * 15)  / 100), 1); 
@@ -48,8 +46,8 @@ int digitalSmooth(float rawIn, float *sensSmoothArray){     // "int *sensSmoothA
   for ( j = bottom; j< top; j++){
     total += sorted[j];  // total remaining indices
     k++; 
-    // Serial.print(sorted[j]); 
-    // Serial.print("   "); 
+//     Serial.print(sorted[j]); 
+//     Serial.print("   "); 
   }
 
 //  Serial.println();

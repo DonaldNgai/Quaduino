@@ -34,7 +34,6 @@ void setup() {
 // ===                    SUPPORTING FUNCTIONS                     ===
 // ===================================================================
 
-bool receivedAll = false;
 bool debug = false;
 bool control = false;
 bool changePID = false;
@@ -178,10 +177,7 @@ void processString(){
   }
       
     bluetoothString = "";
-    receivedAll = false;
 }
-
-
 
 void getBluetoothData(){
    if (Serial.available()) 
@@ -207,13 +203,18 @@ void getBluetoothData(){
 }
 
 int smoothY,smoothP,smoothR;
+int YinIndex,PinIndex,RinIndex;
 
 void getPIDValues(){
   
 //  PIDyaw_val= (int)PIDyaw.Compute((float)setY-yprdegree[0]);
-  smoothY = digitalSmooth(yprdegree[0],yawSmoothArray);
-  smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray);
-  smoothR = digitalSmooth(yprdegree[2],rollSmoothArray);
+  smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,YinIndex);
+  smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
+  smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
+  YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+
   PIDyaw_val = (int)PIDyaw.Compute(setY-smoothY);
   PIDpitch_val= (int)PIDpitch.Compute(setP-smoothP);
   PIDroll_val= (int)PIDroll.Compute(setR-smoothR);
@@ -283,7 +284,7 @@ void updateSensors() {
 //      #endif
 //    }
 //    while (!mpuInterrupt && fifoCount < packetSize);
-  if (mpuInterrupt && mpu.getFIFOCount() >= packetSize)
+  if (mpu.getFIFOCount() >= packetSize)
   {
     // reset interrupt flag and get INT_STATUS byte
     mpuInterrupt = false;

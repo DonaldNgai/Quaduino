@@ -71,7 +71,7 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 float yprdegree[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 //Variables to smooth data from MPU6050
-#define filterSamples   13              // filterSamples should  be an odd number, no smaller than 3
+#define filterSamples   9              // filterSamples should  be an odd number, no smaller than 3
 float yawSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 float pitchSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 float rollSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
