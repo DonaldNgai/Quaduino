@@ -1,5 +1,7 @@
 //#define debug
-
+unsigned long timeOfLastSignal;
+//thirty seconds
+#define FAILSAFE_THRESHOLD   30000
 /////////////////
 //PID VARIABLES//
 /////////////////

@@ -59,6 +59,7 @@ void processString(){
   if (bluetoothString.length() < 61  && 
   bluetoothString.substring(bluetoothString.length()-1,bluetoothString.length()) == "|"
   ){
+    timeOfLastSignal = millis();
     //Debug
     updateIndexes();
     if (temp == "1") debug = true;
@@ -330,8 +331,10 @@ void updateSensors() {
 // ===                    MAIN PROGRAM LOOP                     ===
 // ================================================================
 
-
 void loop(){
+  //failsafe
+  if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD)
+    Serial.println("FAIL!!!!!!!");
   updateSensors();
   getBluetoothData();
   getPIDValues();
