@@ -45,14 +45,6 @@ double dt=(double)(tn-tp);
   pError = mError;
   double I = (double) (Ip + ki * mError * dt /1000.0);
   double U = (double) (P + I + D);
-//  Serial.print("P: ");
-//  Serial.print(P);
-//  Serial.print(" D: ");
-//  Serial.print(D);
-//  Serial.print(" I: ");
-//  Serial.print(I);
-//  Serial.print(" U: ");
-//  Serial.println(U);
   Ip = I;
   tp=tn;
   if(U>Hval){

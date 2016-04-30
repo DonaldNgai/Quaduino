@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,7 +56,9 @@ public class Flight_Controller extends AppCompatActivity {
     public CheckBox beginCheck;
     public CheckBox armCheck;
     public CheckBox controlCheck;
+    public CheckBox scrollCheck;
     public TextView debugBox;
+    public LinearLayout debugWindow;
     public TextView stableText;
     public boolean doCalibrate;
     public boolean PIDChanged = false;
@@ -74,18 +77,18 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_I = 0;
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
-    public final double RP_P_FINAL = 0.4;
+    public final double RP_P_FINAL = 0.2;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
-    public final double Y_P_FINAL = 0;
+    public final double Y_P_FINAL = 0.1;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
-    public final double RP_P_AMOUNT = 0.01;
-    public final double RP_I_AMOUNT = 0.01;
-    public final double RP_D_AMOUNT = 0.01;
-    public final double Y_P_AMOUNT = 0.01;
-    public final double Y_I_AMOUNT = 0.01;
-    public final double Y_D_AMOUNT = 0.01;
+    public final double RP_P_AMOUNT = 0.001;
+    public final double RP_I_AMOUNT = 0.0001;
+    public final double RP_D_AMOUNT = 0.00001;
+    public final double Y_P_AMOUNT = 0.001;
+    public final double Y_I_AMOUNT = 0.0001;
+    public final double Y_D_AMOUNT = 0.00001;
 
     public SeekBar throttleBar;
 
@@ -98,6 +101,11 @@ public class Flight_Controller extends AppCompatActivity {
         }
     };
 
+    public void stopDrone() {
+        throttleBar.setProgress(0);
+        sendData();
+    }
+
     public void sendData(){
         //Data string is of the form
         //Debug,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
@@ -106,7 +114,7 @@ public class Flight_Controller extends AppCompatActivity {
         StringBuilder stringBuilder = new StringBuilder(65);
 
         //Debug
-        if (debugBox.getVisibility() == View.INVISIBLE) stringBuilder.append("0");
+        if (debugWindow.getVisibility() == View.INVISIBLE) stringBuilder.append("0");
         else stringBuilder.append("1");
         stringBuilder.append(",");
 
@@ -147,9 +155,7 @@ public class Flight_Controller extends AppCompatActivity {
         stringBuilder.append(Y_I);stringBuilder.append(",");
         stringBuilder.append(Y_D);stringBuilder.append("|");
 
-        //TODO UNCOMMENT THIS
         mConnectedThread.write(stringBuilder.toString());
-//        mConnectedThread.write("x");
     }
 
     @Override
@@ -162,7 +168,9 @@ public class Flight_Controller extends AppCompatActivity {
         beginCheck = (CheckBox)findViewById(R.id.begin_checkbox);
         armCheck = (CheckBox)findViewById(R.id.arm_checkbox);
         controlCheck = (CheckBox)findViewById(R.id.control_checkbox);
-        debugBox = (TextView)findViewById(R.id.debut_text);
+        scrollCheck = (CheckBox)findViewById(R.id.autoScrollCheck);
+        debugWindow = (LinearLayout)findViewById(R.id.debug_window);
+        debugBox = (TextView)findViewById(R.id.debug_text);
         stableText = (TextView)findViewById(R.id.stableText);
         debugBox.setMovementMethod(new ScrollingMovementMethod());
 
@@ -226,20 +234,27 @@ public class Flight_Controller extends AppCompatActivity {
             {
                 if (msg.what == handlerState)
                 {                                     //if message is what we want
-                    String readMessage = (String) msg.obj;                                                                // msg.arg1 = bytes from connect thread
-                    debugBox.append(readMessage);
-                    if (debugBox.getLineCount() >= 100){
-                        debugBox.getEditableText().delete(0, debugBox.getLineCount()/2);
+                    String readMessage = (String) msg.obj;   // msg.arg1 = bytes from connect thread
+
+                    if(scrollCheck.isChecked()) {
+                        debugBox.append(readMessage);
+
+                        if (debugBox.getLineCount() >= 100) {
+                            debugBox.getEditableText().delete(0, debugBox.getLineCount() / 2);
+                        }
+                        if (readMessage.contains("Stable")) {
+                            stableText.setText("MPU is stable!");
+                        }
+                        if (readMessage.contains("F:1")){
+                            stopDrone();
+                        }
+                        final int scrollAmount = debugBox.getLayout().getLineTop(debugBox.getLineCount()) - debugBox.getHeight();
+                        // if there is no need to scroll, scrollAmount will be <=0
+                        if (scrollAmount > 0)
+                            debugBox.scrollTo(0, scrollAmount);
+                        else
+                            debugBox.scrollTo(0, 0);
                     }
-                    if (readMessage.contains("Stable")){
-                        stableText.setText("MPU is stable!");
-                    }
-                    final int scrollAmount = debugBox.getLayout().getLineTop(debugBox.getLineCount()) - debugBox.getHeight();
-                    // if there is no need to scroll, scrollAmount will be <=0
-                    if (scrollAmount > 0)
-                        debugBox.scrollTo(0, scrollAmount);
-                    else
-                        debugBox.scrollTo(0, 0);
                 }
             }
         };
@@ -298,9 +313,12 @@ public class Flight_Controller extends AppCompatActivity {
         super.onPause();
         try
         {
+            stopDrone();
             connectedThreadRunning = false;
             sensorThreadRunning = false;
-            bluetoothOut.removeCallbacks(transmitRunnable);
+            if (bluetoothOut != null) {
+                bluetoothOut.removeCallbacks(transmitRunnable);
+            }
             //Don't leave Bluetooth sockets open when leaving activity
             btSocket.close();
         } catch (IOException e2) {
@@ -388,7 +406,9 @@ public class Flight_Controller extends AppCompatActivity {
             } catch (IOException e) {
                 //if you cannot write, close the application
                 Toast.makeText(getBaseContext(), "Connection Failure", Toast.LENGTH_LONG).show();
-                finish();
+            // setResult(RESULT_OK,
+//                new Intent().putExtra("YawP", Y_P).putExtra("YawI", Y_I).putExtra("YawD",Y_D).putExtra("RPP", RP_P).putExtra("RPI", RP_P).putExtra("RPD",RP_D));
+            // finish();
 
             }
         }
@@ -454,7 +474,8 @@ public class Flight_Controller extends AppCompatActivity {
                     //-90 - 0 - 270
                     calibratedPhoneOrientation[1] = Math.round((((rawPitch - cPitch) + 180)%360)-180);
                     //-180 - 0 - 180
-                    calibratedPhoneOrientation[2] = Math.round((((rawRoll - cRoll) + 180)%360)-180);
+                    //made it negative to match orientation of the drone
+                    calibratedPhoneOrientation[2] = -Math.round((((rawRoll - cRoll) + 180)%360)-180);
 //                    ((TextView)findViewById(R.id.origY)).setText("Yaw: "+ rawYaw);
 //                    ((TextView)findViewById(R.id.origP)).setText("Pitch: "+ rawPitch);
 //                    ((TextView)findViewById(R.id.origR)).setText("Roll: "+ rawRoll);
@@ -471,11 +492,13 @@ public class Flight_Controller extends AppCompatActivity {
     public void calibrateDrone(View v){ doCalibrate = true; }
 
     public void finish(View v){
+        setResult(RESULT_OK,
+                new Intent().putExtra("YawP", Y_P).putExtra("YawI", Y_I).putExtra("YawD",Y_D).putExtra("RPP", RP_P).putExtra("RPI", RP_I).putExtra("RPD",RP_D));
         finish();
     }
 
     public void debug(View v){
-        TextView debugWindow = (TextView)findViewById(R.id.debut_text);
+//        L debugWindow = (TextView)findViewById(R.id.debug_text);
         int visibility = debugWindow.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE;
         debugWindow.setVisibility(visibility);
     }
@@ -517,7 +540,7 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                RP_P = Math.round((RP_P + RP_P_AMOUNT)*1000.0)/1000.0;
+                RP_P = Math.round((RP_P + RP_P_AMOUNT) * 100000.0) / 100000.0;
                 ((TextView) findViewById(R.id.RP_P_label)).setText(String.valueOf(RP_P));
             }
         });
@@ -525,9 +548,12 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_RP_P).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PIDChanged = true;
-                RP_P = Math.round((RP_P - RP_P_AMOUNT)*1000.0)/1000.0;
-                ((TextView) findViewById(R.id.RP_P_label)).setText(String.valueOf(RP_P));
+                    PIDChanged = true;
+                    RP_P = Math.round((RP_P - RP_P_AMOUNT) * 100000.0) / 100000.0;
+                if (RP_P <= 0) {
+                    RP_P = 0;
+                }
+                    ((TextView) findViewById(R.id.RP_P_label)).setText(String.valueOf(RP_P));
             }
         });
 
@@ -536,7 +562,7 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                RP_I = Math.round((RP_I + RP_I_AMOUNT)*1000.0)/1000.0;
+                RP_I = Math.round((RP_I + RP_I_AMOUNT)*100000.0)/100000.0;
                 ((TextView) findViewById(R.id.RP_I_label)).setText(String.valueOf(RP_I));
             }
         });
@@ -544,9 +570,13 @@ public class Flight_Controller extends AppCompatActivity {
         findViewById(R.id.sub_RP_I).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PIDChanged = true;
-                RP_I = Math.round((RP_I - RP_I_AMOUNT)*1000.0)/1000.0;
-                ((TextView) findViewById(R.id.RP_I_label)).setText(String.valueOf(RP_I));
+                    PIDChanged = true;
+                    RP_I = Math.round((RP_I - RP_I_AMOUNT) * 100000.0) / 100000.0;
+                    if (RP_I <= 0) {
+                        RP_I = 0;
+                    }
+                    ((TextView) findViewById(R.id.RP_I_label)).setText(String.valueOf(RP_I));
+
             }
         });
 
@@ -555,7 +585,7 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                RP_D = Math.round((RP_D + RP_D_AMOUNT)*1000.0)/1000.0;
+                RP_D = Math.round((RP_D + RP_D_AMOUNT)*100000.0)/100000.0;
                 ((TextView) findViewById(R.id.RP_D_label)).setText(String.valueOf(RP_D));
             }
         });
@@ -564,7 +594,10 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                RP_D = Math.round((RP_D - RP_D_AMOUNT)*1000.0)/1000.0;
+                RP_D = Math.round((RP_D - RP_D_AMOUNT)*100000.0)/100000.0;
+                if (RP_D <= 0) {
+                    RP_D = 0;
+                }
                 ((TextView) findViewById(R.id.RP_D_label)).setText(String.valueOf(RP_D));
             }
         });
@@ -574,7 +607,7 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                Y_P = Math.round((Y_P + Y_P_AMOUNT)*1000.0)/1000.0;
+                Y_P = Math.round((Y_P + Y_P_AMOUNT)*100000.0)/100000.0;
                 ((TextView) findViewById(R.id.Y_P_label)).setText(String.valueOf(Y_P));
             }
         });
@@ -583,7 +616,10 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                Y_P = Math.round((Y_P - Y_P_AMOUNT)*1000.0)/1000.0;
+                Y_P = Math.round((Y_P - Y_P_AMOUNT)*100000.0)/100000.0;
+                if (Y_P <= 0) {
+                    Y_P = 0;
+                }
                 ((TextView) findViewById(R.id.Y_P_label)).setText(String.valueOf(Y_P));
             }
         });
@@ -593,7 +629,7 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                Y_I = Math.round((Y_I + Y_I_AMOUNT)*1000.0)/1000.0;
+                Y_I = Math.round((Y_I + Y_I_AMOUNT)*100000.0)/100000.0;
                 ((TextView) findViewById(R.id.Y_I_label)).setText(String.valueOf(Y_I));
             }
         });
@@ -602,7 +638,10 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                Y_I = Math.round((Y_I - Y_I_AMOUNT)*1000.0)/1000.0;
+                Y_I = Math.round((Y_I - Y_I_AMOUNT)*100000.0)/100000.0;
+                if (Y_I <= 0) {
+                    Y_I = 0;
+                }
                 ((TextView) findViewById(R.id.Y_I_label)).setText(String.valueOf(Y_I));
             }
         });
@@ -612,7 +651,7 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                Y_D = Math.round((Y_D + Y_D_AMOUNT)*1000.0)/1000.0;
+                Y_D = Math.round((Y_D + Y_D_AMOUNT)*100000.0)/100000.0;
                 ((TextView) findViewById(R.id.Y_D_label)).setText(String.valueOf(Y_D));
             }
         });
@@ -621,7 +660,10 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PIDChanged = true;
-                Y_D = Math.round((Y_D - Y_D_AMOUNT)*1000.0)/1000.0;
+                Y_D = Math.round((Y_D - Y_D_AMOUNT)*100000.0)/100000.0;
+                if (Y_D <= 0) {
+                    Y_D = 0;
+                }
                 ((TextView) findViewById(R.id.Y_D_label)).setText(String.valueOf(Y_D));
             }
         });

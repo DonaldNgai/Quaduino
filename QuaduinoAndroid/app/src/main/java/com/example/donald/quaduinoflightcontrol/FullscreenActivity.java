@@ -110,8 +110,32 @@ public class FullscreenActivity extends AppCompatActivity {
             Intent i = new Intent(FullscreenActivity.this, Flight_Controller.class);
             //Change the activity.
             i.putExtra(EXTRA_ADDRESS, address); //this will be received at Flight Controller (class) Activity
-            startActivity(i);
+            startActivityForResult(i,0);
         }
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 0 && resultCode == RESULT_OK){
+            double RP_P = data.getDoubleExtra("RPP", -1);
+            double RP_I = data.getDoubleExtra("RPI", -1);
+            double RP_D = data.getDoubleExtra("RPD", -1);
+            double Y_P = data.getDoubleExtra("YawP", -1);
+            double Y_I = data.getDoubleExtra("YawI", -1);
+            double Y_D = data.getDoubleExtra("YawD", -1);
+
+            StringBuilder sb = new StringBuilder(150);
+
+            sb.append( "Yaw P: " + Y_P + "\n" +
+                    "Yaw I: " + Y_I + "\n" +
+                    "Yaw D: " + Y_D + "\n" +
+                    "RP P: " + RP_P + "\n" +
+                    "RP I: " + RP_I + "\n" +
+                    "RP D: " + RP_D + "\n");
+
+            ((TextView) findViewById(R.id.PID_Results)).setText(sb.toString());
+        }
+    }
 
 }

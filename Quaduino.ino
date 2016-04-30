@@ -68,6 +68,7 @@ void processString(){
     //Calibrate
     updateIndexes();
     if (temp == "1") {
+        failSafe = false;
         setY = yprdegree[0];
         setP = yprdegree[1];
         setR = yprdegree[2];
@@ -89,11 +90,17 @@ void processString(){
     //Throttle
     updateIndexes();
     bluetoothInt = temp.toInt();
-    if (bluetoothInt <= 100 && bluetoothInt >= 0){
+    if (failSafe){
+      throttle = map(0,0,100,0,179);
+    }
+    else{
+       if (bluetoothInt <= 100 && bluetoothInt >= 0){
 //      throttle = map(bluetoothInt,0,100,620,765);
         throttle = map(bluetoothInt,0,100,0,179);
 
+      }
     }
+   
 
     //Control
     updateIndexes();
@@ -248,11 +255,15 @@ void adjustMotors(){
 
 // TODO i don't get it but putting in serial print makes the pid controller work but takig it out makes it not work
 //  if(debug){
-  Serial.print("Y2: " + String(yprdegree[0]) + ", P: " + String(yprdegree[1]) + ", R: " + String(yprdegree[2]));
-  Serial.print(", M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
+//  Serial.print("Y2: " + String(yprdegree[0]) + ", P: " + String(yprdegree[1]) + ", R: " + String(yprdegree[2]));
+
+  Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
 //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
-  Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
-//  Serial.println(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+//  Serial.println(" setY: " + String(setY-smoothY) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
+  Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+  Serial.print(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+  Serial.println(" F:" + String(failSafe));
+
 //  }
 
     MOTOR1.write(m1_val);
@@ -322,6 +333,10 @@ void updateSensors() {
             yprdegree[0] = (ypr[0] * 180/M_PI);
             yprdegree[1] = (ypr[1] * 180/M_PI);
             yprdegree[2] = (ypr[2] * 180/M_PI);
+            //failsafe while debugging
+            if (abs(yprdegree[1])+ abs(yprdegree[2]) > 38){
+              failSafe = true;
+            }
 
         }
     }
@@ -333,8 +348,10 @@ void updateSensors() {
 
 void loop(){
   //failsafe
-  if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD)
+  if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD){
+    failSafe = true;
     Serial.println("FAIL!!!!!!!");
+  }
   updateSensors();
   getBluetoothData();
   getPIDValues();

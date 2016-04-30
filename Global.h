@@ -2,34 +2,35 @@
 unsigned long timeOfLastSignal;
 //thirty seconds
 #define FAILSAFE_THRESHOLD   30000
+bool failSafe = false;
 /////////////////
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 0.40;
+double ROLL_PID_KP = 0.20;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0;
-double ROLL_PID_KD = 0.035;
-double ROLL_PID_MIN = -50.0;
-double ROLL_PID_MAX = 50.0;
+double ROLL_PID_KD = 0;
+double ROLL_PID_MIN = -15.0;
+double ROLL_PID_MAX = 15.0;
 
-double PITCH_PID_KP =  0.40;
+double PITCH_PID_KP =  0.20;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0;
-double PITCH_PID_KD = 0.035;
-double PITCH_PID_MIN = -50.0;
-double PITCH_PID_MAX = 50.0;
+double PITCH_PID_KD = 0;
+double PITCH_PID_MIN = -15.0;
+double PITCH_PID_MAX = 15.0;
 
-double YAW_PID_KP = 0.0;
+double YAW_PID_KP = 0.1;
 double YAW_PID_KI =  0.0;
 double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
 //double YAW_PID_KI =  0.500;
 //double YAW_PID_KD = 0.0001;
-double YAW_PID_MIN = -50.0;
-double YAW_PID_MAX = 50.0;
+double YAW_PID_MIN = -15.0;
+double YAW_PID_MAX = 15.0;
 
 //Define the PID class
 PIDCont PIDroll;

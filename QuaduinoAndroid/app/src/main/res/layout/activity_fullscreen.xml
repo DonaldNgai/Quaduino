@@ -41,7 +41,7 @@
 
             <ListView
                 android:layout_width="190dp"
-                android:layout_height="wrap_content"
+                android:layout_height="190dp"
                 android:id="@+id/bluetooth_list"
                 android:layout_gravity="center"
                 android:choiceMode="singleChoice"
@@ -50,6 +50,22 @@
                 android:clickable="true"
                 android:background="#ffffff" />
         </TableRow>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/PID_Results"
+                android:textColor="#ffffff"
+                android:layout_gravity="center_horizontal" />
+        </TableRow>
+
     </TableLayout>
 
     <TableLayout

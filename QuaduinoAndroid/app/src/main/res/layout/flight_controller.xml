@@ -14,7 +14,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|top">
+        android:layout_gravity="center_horizontal|top"
+        android:gravity="bottom">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -208,7 +209,7 @@
 
         <TableLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="89dp">
 
             <TableRow
                 android:layout_width="match_parent"
@@ -366,7 +367,7 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal|bottom">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -412,7 +413,7 @@
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center">
+            android:layout_gravity="center_horizontal|bottom">
 
             <TableRow
                 android:layout_width="wrap_content"
@@ -508,16 +509,36 @@
 
     </LinearLayout>
 
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="151dp"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/debut_text"
-        android:maxHeight="250dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|top"
+        android:id="@+id/debug_window"
         android:background="#ffffff"
-        android:textColor="#000000"
-        android:visibility="invisible"
-        android:maxLines="15"
-        android:scrollbars="vertical"/>
+        android:visibility="invisible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="144dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/debug_text"
+            android:maxHeight="250dp"
+            android:background="#ffffff"
+            android:textColor="#000000"
+            android:visibility="visible"
+            android:maxLines="15"
+            android:scrollbars="vertical"/>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto-Scroll"
+            android:id="@+id/autoScrollCheck"
+            android:layout_gravity="center|bottom"
+            android:textColor="#000000"
+            android:checked="true" />
+
+    </LinearLayout>
 
 </FrameLayout>
