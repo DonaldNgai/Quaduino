@@ -2,11 +2,11 @@
 // ===                    DATA SMOOTHING FUNCTION                     ===
 // ======================================================================
 
-int digitalSmooth(float rawIn, float *sensSmoothArray, int inIndex){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
-  int j, k, temp, top, bottom;
-  long total;
+double digitalSmooth(float rawIn, float *sensSmoothArray, int inIndex){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
+  int j, k, top, bottom;
+  double temp, total;
  // static int raw[filterSamples];
-  static int sorted[filterSamples];
+  static double sorted[filterSamples];
   boolean done;
 
   sensSmoothArray[inIndex] = rawIn;                 // input new data into the oldest slot
@@ -51,7 +51,7 @@ int digitalSmooth(float rawIn, float *sensSmoothArray, int inIndex){     // "int
   }
 
 //  Serial.println();
-//  Serial.print("average = ");
+//  Serial.print("total = " + String(total) + " ");
 //  Serial.println(total/k);
   return total / k;    // divide by number of samples
 }

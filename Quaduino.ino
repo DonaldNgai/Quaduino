@@ -37,6 +37,7 @@ void setup() {
 bool debug = false;
 bool control = false;
 bool changePID = false;
+bool gotAll = false;
 
 int commaIndex = -1;
 String temp = "";
@@ -46,19 +47,31 @@ void updateIndexes(){
   commaIndex = bluetoothString.indexOf(',');
   temp = bluetoothString.substring(0,commaIndex);  
   bluetoothString = bluetoothString.substring(commaIndex + 1,endIndex);
+//  Serial.println(String(endIndex) + " " + String(commaIndex) + " " + String(temp) + " " + String(bluetoothString));
 }
 
 void processString(){
 //Debug,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
 //,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
   int bluetoothInt;
-//  Serial.println(bluetoothString);
-//  if (debug)Serial.println("Length: " + String(bluetoothString.length()) + " " + bluetoothString);
-  //Max length of a string should be 59 but i made it 61 just in case
-//  Serial.println ( bluetoothString + " - " + );
-  if (bluetoothString.length() < 61  && 
-  bluetoothString.substring(bluetoothString.length()-1,bluetoothString.length()) == "|"
-  ){
+//    Serial.println ( "a" + bluetoothString );
+
+  //checksum
+  bool goodCheck = false;
+  updateIndexes();
+  if (temp.charAt(0) == 'C')
+  {
+//    Serial.println ( "b" + bluetoothString );
+    if (bluetoothString.length() == temp.substring(1,temp.length()).toInt()){
+      goodCheck = true;
+    }
+  }
+
+  if (goodCheck && 
+    bluetoothString.substring(bluetoothString.length()-1,bluetoothString.length()) == "|"
+    )
+  {
+//    Serial.println ( "c" + bluetoothString );
     timeOfLastSignal = millis();
     //Debug
     updateIndexes();
@@ -181,7 +194,6 @@ void processString(){
     endIndex = 0;
     commaIndex = 0;
     temp = "";
-    bluetoothString = "";
   }
       
     bluetoothString = "";
@@ -210,7 +222,7 @@ void getBluetoothData(){
   }
 }
 
-int smoothY,smoothP,smoothR;
+double smoothY,smoothP,smoothR;
 int YinIndex,PinIndex,RinIndex;
 
 void getPIDValues(){
@@ -219,13 +231,18 @@ void getPIDValues(){
   smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,YinIndex);
   smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
   smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
+  //failsafe while debugging
+  if (abs(smoothP)+ abs(smoothR) > 38){
+    failSafe = true;
+    Serial.println("Crazy Angle");
+  }
   YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
 
-  PIDyaw_val = (int)PIDyaw.Compute(setY-smoothY);
-  PIDpitch_val= (int)PIDpitch.Compute(setP-smoothP);
-  PIDroll_val= (int)PIDroll.Compute(setR-smoothR);
+  PIDyaw_val = PIDyaw.Compute(setY-smoothY);
+  PIDpitch_val= PIDpitch.Compute(setP-smoothP);
+  PIDroll_val= PIDroll.Compute(setR-smoothR);
 
 }
 
@@ -333,10 +350,7 @@ void updateSensors() {
             yprdegree[0] = (ypr[0] * 180/M_PI);
             yprdegree[1] = (ypr[1] * 180/M_PI);
             yprdegree[2] = (ypr[2] * 180/M_PI);
-            //failsafe while debugging
-            if (abs(yprdegree[1])+ abs(yprdegree[2]) > 38){
-              failSafe = true;
-            }
+            
 
         }
     }
@@ -350,8 +364,11 @@ void loop(){
   //failsafe
   if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD){
     failSafe = true;
-    Serial.println("FAIL!!!!!!!");
+    Serial.println("No Signal");
   }
+  if (failSafe)
+  Serial.println("FAIL!!!!!!!");
+  
   updateSensors();
   getBluetoothData();
   getPIDValues();

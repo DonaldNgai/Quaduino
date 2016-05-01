@@ -58,10 +58,12 @@ public class Flight_Controller extends AppCompatActivity {
     public CheckBox controlCheck;
     public CheckBox scrollCheck;
     public TextView debugBox;
+    public TextView outputBox;
     public LinearLayout debugWindow;
     public TextView stableText;
     public boolean doCalibrate;
     public boolean PIDChanged = false;
+    public boolean writeFailed = false;
 
     public float orientation[] = new float[3];
     public float[] calibratedPhoneOrientation = new float[3];
@@ -77,10 +79,10 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_I = 0;
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
-    public final double RP_P_FINAL = 0.2;
+    public final double RP_P_FINAL = 0.04;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
-    public final double Y_P_FINAL = 0.1;
+    public final double Y_P_FINAL = 0.08;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
     public final double RP_P_AMOUNT = 0.001;
@@ -155,6 +157,25 @@ public class Flight_Controller extends AppCompatActivity {
         stringBuilder.append(Y_I);stringBuilder.append(",");
         stringBuilder.append(Y_D);stringBuilder.append("|");
 
+        //Prepend Checksum
+        String stringLength = Integer.toString(stringBuilder.length());
+        //+2 for the C and semicolon and +2 for 10-99 length
+        stringBuilder.insert(0,"C" + stringLength + ",");
+
+        if(scrollCheck.isChecked()) {
+            outputBox.append(stringBuilder.toString());
+            outputBox.append("\n");
+            if (outputBox.getLineCount() >= 500) {
+                outputBox.getEditableText().delete(0, outputBox.getLineCount() / 2);
+            }
+            final int scrollAmount = outputBox.getLayout().getLineTop(outputBox.getLineCount()) - outputBox.getHeight();
+            // if there is no need to scroll, scrollAmount will be <=0
+            if (scrollAmount > 0)
+                outputBox.scrollTo(0, scrollAmount);
+            else
+                outputBox.scrollTo(0, 0);
+        }
+
         mConnectedThread.write(stringBuilder.toString());
     }
 
@@ -171,8 +192,10 @@ public class Flight_Controller extends AppCompatActivity {
         scrollCheck = (CheckBox)findViewById(R.id.autoScrollCheck);
         debugWindow = (LinearLayout)findViewById(R.id.debug_window);
         debugBox = (TextView)findViewById(R.id.debug_text);
+        outputBox = (TextView)findViewById(R.id.outputWindow);
         stableText = (TextView)findViewById(R.id.stableText);
         debugBox.setMovementMethod(new ScrollingMovementMethod());
+        outputBox.setMovementMethod(new ScrollingMovementMethod());
 
         beginCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -239,7 +262,7 @@ public class Flight_Controller extends AppCompatActivity {
                     if(scrollCheck.isChecked()) {
                         debugBox.append(readMessage);
 
-                        if (debugBox.getLineCount() >= 100) {
+                        if (debugBox.getLineCount() >= 500) {
                             debugBox.getEditableText().delete(0, debugBox.getLineCount() / 2);
                         }
                         if (readMessage.contains("Stable")) {
@@ -401,15 +424,18 @@ public class Flight_Controller extends AppCompatActivity {
         //write method
         public void write(String input) {
             byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
-            try {
-                mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
-            } catch (IOException e) {
-                //if you cannot write, close the application
-                Toast.makeText(getBaseContext(), "Connection Failure", Toast.LENGTH_LONG).show();
-            // setResult(RESULT_OK,
-//                new Intent().putExtra("YawP", Y_P).putExtra("YawI", Y_I).putExtra("YawD",Y_D).putExtra("RPP", RP_P).putExtra("RPI", RP_P).putExtra("RPD",RP_D));
-            // finish();
+            if (!writeFailed){
+                try {
+                    mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
+                } catch (IOException e) {
+                    //if you cannot write, close the application
+                    writeFailed = true;
+                    Toast.makeText(getBaseContext(), "Connection Failure", Toast.LENGTH_LONG).show();
+                // setResult(RESULT_OK,
+    //                new Intent().putExtra("YawP", Y_P).putExtra("YawI", Y_I).putExtra("YawD",Y_D).putExtra("RPP", RP_P).putExtra("RPI", RP_P).putExtra("RPD",RP_D));
+                // finish();
 
+                }
             }
         }
     }

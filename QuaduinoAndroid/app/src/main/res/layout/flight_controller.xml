@@ -512,15 +512,16 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="225dp"
         android:layout_gravity="center_horizontal|top"
         android:id="@+id/debug_window"
         android:background="#ffffff"
-        android:visibility="invisible">
+        android:visibility="invisible"
+        android:weightSum="1">
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="144dp"
+            android:layout_height="115dp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:id="@+id/debug_text"
             android:maxHeight="250dp"
@@ -528,7 +529,20 @@
             android:textColor="#000000"
             android:visibility="visible"
             android:maxLines="15"
-            android:scrollbars="vertical"/>
+            android:scrollbars="vertical"
+            android:layout_weight="1.17" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/outputWindow"
+            android:maxHeight="250dp"
+            android:background="#ffffff"
+            android:textColor="#000000"
+            android:visibility="visible"
+            android:maxLines="3"
+            android:scrollbars="vertical" />
 
         <CheckBox
             android:layout_width="wrap_content"
