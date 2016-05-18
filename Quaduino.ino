@@ -179,13 +179,13 @@ void processString(){
       PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
       PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
 
-      Serial.println("Roll");
+      Serial.println(F("Roll"));
       String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
       Serial.println(output);
-      Serial.println("Pitch");
+      Serial.println(F("Pitch"));
       output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
       Serial.println(output);
-      Serial.println("Yaw");
+      Serial.println(F("Yaw"));
       output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
       Serial.println(output);
     }
@@ -234,7 +234,7 @@ void getPIDValues(){
   //failsafe while debugging
   if (abs(smoothP)+ abs(smoothR) > 38){
     failSafe = true;
-    Serial.println("Crazy Angle");
+    Serial.println(F("Crazy Angle"));
   }
   YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
@@ -295,6 +295,9 @@ void adjustMotors(){
 
 void updateSensors() {
     double a,P;
+    Quaternion q;           // [w, x, y, z]         quaternion container
+    VectorFloat gravity;    // [x, y, z]            gravity vector
+    float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
     // wait for MPU interrupt or extra packet(s) available
@@ -364,13 +367,25 @@ void loop(){
   //failsafe
   if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD){
     failSafe = true;
-    Serial.println("No Signal");
+    Serial.println(F("No Signal"));
   }
   if (failSafe)
-  Serial.println("FAIL!!!!!!!");
+  Serial.println(F("FAIL!!!!!!!"));
+
   
   updateSensors();
   getBluetoothData();
-  getPIDValues();
+  
+  unsigned long temp = millis();
+  timeChange = (temp - lastTime);
+  if (timeChange > SAMPLE_TIME)
+  {
+    getPIDValues();
+    Serial.print(F("T: "));
+    Serial.print(timeChange);
+    Serial.println(F(""));
+    lastTime = temp;
+  }
+
   adjustMotors();
 }

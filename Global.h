@@ -1,5 +1,10 @@
 //#define debug
 unsigned long timeOfLastSignal;
+
+#define SAMPLE_TIME 100 //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
+unsigned long lastTime = millis()-SAMPLE_TIME;
+unsigned long timeChange = 0;
+
 //thirty seconds
 #define FAILSAFE_THRESHOLD   30000
 bool failSafe = false;
@@ -68,9 +73,6 @@ uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 // orientation/motion vars
-Quaternion q;           // [w, x, y, z]         quaternion container
-VectorFloat gravity;    // [x, y, z]            gravity vector
-float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 float yprdegree[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 //Variables to smooth data from MPU6050
