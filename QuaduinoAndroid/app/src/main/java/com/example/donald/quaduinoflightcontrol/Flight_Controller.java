@@ -1,7 +1,6 @@
 package com.example.donald.quaduinoflightcontrol;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -14,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -28,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
+
+//TODO deal with edge cases for seekbar tap
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -71,6 +71,8 @@ public class Flight_Controller extends AppCompatActivity {
     public float cYaw,cRoll = 0;
     public float cPitch = -90;
     public float rawYaw,rawRoll,rawPitch = 0;
+
+    public int originalProgress;
 
     public double RP_P = 0;
     public double RP_I = 0;
@@ -221,12 +223,12 @@ public class Flight_Controller extends AppCompatActivity {
             }
         });
 
-        throttleBar.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                return true;
-            }
-        });
+//        throttleBar.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//                return true;
+//            }
+//        });
         throttleBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -236,12 +238,37 @@ public class Flight_Controller extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
+                originalProgress = throttleBar.getProgress();
             }
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                ((TextView) findViewById(R.id.throttle_label)).setText("Throttle: " + progress);
+                int realProgress = 0;
+                    if (fromUser == true) {
+                        // only allow changes by 1 up or down
+                        if (((progress > (originalProgress + 10))
+                                || (progress < (originalProgress - 10)))) {
+                            throttleBar.setProgress(originalProgress);
+                            realProgress = originalProgress;
+                        } else if (armCheck.isChecked() && beginCheck.isChecked()){
+                            originalProgress = progress;
+                            realProgress = progress;
+                        }
+                    }
+                    else
+                    {
+                        if (armCheck.isChecked() && beginCheck.isChecked()){
+//                            originalProgress = progress;
+                            realProgress = progress;
+                        }
+                        else{
+                            throttleBar.setProgress(originalProgress);
+                            realProgress = originalProgress;
+                        }
+                    }
+                    ((TextView) findViewById(R.id.throttle_label)).setText("Throttle: " + realProgress);
+
+//
             }
         });
 
@@ -530,11 +557,12 @@ public class Flight_Controller extends AppCompatActivity {
     }
 
     public void addThrottle(View v){
-        if (armCheck.isChecked() && beginCheck.isChecked())
+        originalProgress = throttleBar.getProgress();
         throttleBar.setProgress(throttleBar.getProgress() + THROTTLE_AMOUNT);
     }
 
     public void subThrottle(View v){
+        originalProgress = throttleBar.getProgress();
         throttleBar.setProgress(throttleBar.getProgress() - THROTTLE_AMOUNT);
     }
 
