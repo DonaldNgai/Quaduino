@@ -1,7 +1,7 @@
 //#define debug
 unsigned long timeOfLastSignal;
 
-#define SAMPLE_TIME 100 //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
+#define SAMPLE_TIME 13 //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
 unsigned long lastTime = millis()-SAMPLE_TIME;
 unsigned long timeChange = 0;
 
@@ -12,7 +12,7 @@ bool failSafe = false;
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 0.015;
+double ROLL_PID_KP = 0.06;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0;
@@ -20,7 +20,7 @@ double ROLL_PID_KD = 0;
 double ROLL_PID_MIN = -15.0;
 double ROLL_PID_MAX = 15.0;
 
-double PITCH_PID_KP =  0.015;
+double PITCH_PID_KP =  0.06;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0;
@@ -128,7 +128,7 @@ Servo MOTOR4;
 //#define MOTOR_RUN_LEVEL 630
 ////Value at which motors are not moving
 //#define MOTOR_ZERO_LEVEL 620
-#define MAX_SIGNAL 180
+#define MAX_SIGNAL 90
 //Minimum Value before motors begin spinning
 #define MOTOR_RUN_LEVEL 4
 //Value at which motors are not moving

@@ -109,7 +109,7 @@ void processString(){
     else{
        if (bluetoothInt <= 100 && bluetoothInt >= 0){
 //      throttle = map(bluetoothInt,0,100,620,765);
-        throttle = map(bluetoothInt,0,100,0,179);
+        throttle = map(bluetoothInt,0,100,0,MAX_SIGNAL);
 
       }
     }
@@ -180,14 +180,11 @@ void processString(){
       PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
 
       Serial.println(F("Roll"));
-      String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
-      Serial.println(output);
+      Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
       Serial.println(F("Pitch"));
-      output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
-      Serial.println(output);
+      Serial.println("P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX));
       Serial.println(F("Yaw"));
-      output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
-      Serial.println(output);
+      Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
     }
 
     //reset
@@ -243,6 +240,8 @@ void getPIDValues(){
   PIDyaw_val = PIDyaw.Compute(setY-smoothY);
   PIDpitch_val= PIDpitch.Compute(setP-smoothP);
   PIDroll_val= PIDroll.Compute(setR-smoothR);
+
+//  Serial.println("YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
 
 }
 
@@ -378,12 +377,15 @@ void loop(){
   
   unsigned long temp = millis();
   timeChange = (temp - lastTime);
+//  Serial.print(F("T: "));
+//    Serial.print(timeChange);
+//    Serial.println(F(""));
   if (timeChange > SAMPLE_TIME)
   {
     getPIDValues();
-    Serial.print(F("T: "));
-    Serial.print(timeChange);
-    Serial.println(F(""));
+//    Serial.print(F("T: "));
+//    Serial.print(timeChange);
+//    Serial.println(F(""));
     lastTime = temp;
   }
 
