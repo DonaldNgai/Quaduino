@@ -236,8 +236,9 @@ void getPIDValues(){
   YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-
-  PIDyaw_val = PIDyaw.Compute(setY-smoothY);
+  PIDyaw_val = PIDyaw.Compute((((smoothY - setY) + 180)%360)-180);
+  
+//  PIDyaw_val = PIDyaw.Compute(setY-smoothY);
   PIDpitch_val= PIDpitch.Compute(setP-smoothP);
   PIDroll_val= PIDroll.Compute(setR-smoothR);
 
