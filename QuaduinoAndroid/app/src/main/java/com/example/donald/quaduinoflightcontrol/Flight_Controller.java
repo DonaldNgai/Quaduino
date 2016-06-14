@@ -81,12 +81,14 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_I = 0;
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
-    public final double RP_P_FINAL = 0.04;
+    //What the starting PID values should be
+    public final double RP_P_FINAL = 3.0;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
-    public final double Y_P_FINAL = 0.08;
+    public final double Y_P_FINAL = 0.045;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
+    //How much to increase values when changing
     public final double RP_P_AMOUNT = 0.001;
     public final double RP_I_AMOUNT = 0.0001;
     public final double RP_D_AMOUNT = 0.00001;
@@ -292,7 +294,7 @@ public class Flight_Controller extends AppCompatActivity {
                         if (debugBox.getLineCount() >= 500) {
                             debugBox.getEditableText().delete(0, debugBox.getLineCount() / 2);
                         }
-                        if (readMessage.contains("Stable")) {
+                        if (readMessage.contains("*")) {
                             stableText.setText("MPU is stable!");
                         }
                         if (readMessage.contains("F:1")){

@@ -229,14 +229,14 @@ void getPIDValues(){
   smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
   smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
   //failsafe while debugging
-  if (abs(smoothP)+ abs(smoothR) > 38){
+  if (abs(smoothP)+ abs(smoothR) > 48){
     failSafe = true;
     Serial.println(F("Crazy Angle"));
   }
   YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  PIDyaw_val = PIDyaw.Compute((((smoothY - setY) + 180)%360)-180);
+  PIDyaw_val = PIDyaw.Compute(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180);
   
 //  PIDyaw_val = PIDyaw.Compute(setY-smoothY);
   PIDpitch_val= PIDpitch.Compute(setP-smoothP);
@@ -276,7 +276,7 @@ void adjustMotors(){
 
   Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
 //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
-//  Serial.println(" setY: " + String(setY-smoothY) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
+//  Serial.println(" setY: " + String(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
   Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
   Serial.print(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
   Serial.println(" F:" + String(failSafe));

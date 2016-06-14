@@ -94,7 +94,7 @@ void initMPU(){
         Serial.println(F("Waiting for DMP to stablilize"));
 
         delay(20000);
-        Serial.println(F("Stable"));
+        Serial.println(F("*********************************************************************************"));
 
         setY = yprdegree[0];
         setP = yprdegree[1];
