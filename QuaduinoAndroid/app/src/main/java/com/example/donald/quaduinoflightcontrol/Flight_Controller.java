@@ -82,7 +82,7 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
     //What the starting PID values should be
-    public final double RP_P_FINAL = 3.0;
+    public final double RP_P_FINAL = 0.25;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
     public final double Y_P_FINAL = 0.045;

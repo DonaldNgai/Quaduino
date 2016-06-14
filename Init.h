@@ -64,15 +64,15 @@ void initMPU(){
     Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
 
-//Your offsets:  1773  869 1049  26  -34 26
+//Your offsets:  1832 880 1041 42 -33 19
 
 //For my own chip
-    mpu.setXGyroOffset(44);
-    mpu.setYGyroOffset(-30);
+    mpu.setXGyroOffset(42);
+    mpu.setYGyroOffset(-33);
     mpu.setZGyroOffset(19);
-    mpu.setXAccelOffset(1814);
-    mpu.setYAccelOffset(883);
-    mpu.setZAccelOffset(1099);
+    mpu.setXAccelOffset(1832);
+    mpu.setYAccelOffset(880);
+    mpu.setZAccelOffset(1041);
 
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {

@@ -12,7 +12,7 @@ bool failSafe = false;
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 3.0;
+double ROLL_PID_KP = 0.25;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0;
@@ -20,7 +20,7 @@ double ROLL_PID_KD = 0;
 double ROLL_PID_MIN = -15.0;
 double ROLL_PID_MAX = 15.0;
 
-double PITCH_PID_KP = 3.0;
+double PITCH_PID_KP = 0.25;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0;
