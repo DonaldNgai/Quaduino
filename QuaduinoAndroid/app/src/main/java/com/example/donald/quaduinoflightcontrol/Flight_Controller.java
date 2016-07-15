@@ -1,15 +1,18 @@
 package com.example.donald.quaduinoflightcontrol;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
@@ -22,9 +25,14 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.UUID;
 
 //TODO deal with edge cases for seekbar tap
@@ -53,17 +61,23 @@ public class Flight_Controller extends AppCompatActivity {
     //50 times per second = 50Hz
     public final int DATA_TRANSMIT_FREQUENCY = 20;
 
+    public String time;
+
     public CheckBox beginCheck;
     public CheckBox armCheck;
     public CheckBox controlCheck;
     public CheckBox scrollCheck;
+    public CheckBox logCheck;
+    public CheckBox fineCheck;
     public TextView debugBox;
     public TextView outputBox;
+    public TextView logBox;
     public LinearLayout debugWindow;
     public TextView stableText;
     public boolean doCalibrate;
     public boolean PIDChanged = false;
     public boolean writeFailed = false;
+    public boolean clearFailsafe = false;
 
     public float orientation[] = new float[3];
     public float[] calibratedPhoneOrientation = new float[3];
@@ -82,19 +96,19 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
     //What the starting PID values should be
-    public final double RP_P_FINAL = 0.25;
+    public final double RP_P_FINAL = 0.33;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
-    public final double Y_P_FINAL = 0.045;
+    public final double Y_P_FINAL = 0.027;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
     //How much to increase values when changing
-    public final double RP_P_AMOUNT = 0.001;
-    public final double RP_I_AMOUNT = 0.0001;
-    public final double RP_D_AMOUNT = 0.00001;
-    public final double Y_P_AMOUNT = 0.001;
-    public final double Y_I_AMOUNT = 0.0001;
-    public final double Y_D_AMOUNT = 0.00001;
+    public double RP_P_AMOUNT = 0.01;
+    public double RP_I_AMOUNT = 0.0001;
+    public double RP_D_AMOUNT = 0.0001;
+    public double Y_P_AMOUNT = 0.001;
+    public double Y_I_AMOUNT = 0.0001;
+    public double Y_D_AMOUNT = 0.00001;
 
     public SeekBar throttleBar;
 
@@ -109,6 +123,7 @@ public class Flight_Controller extends AppCompatActivity {
 
     public void stopDrone() {
         throttleBar.setProgress(0);
+        armCheck.setChecked(false);
         sendData();
     }
 
@@ -120,8 +135,17 @@ public class Flight_Controller extends AppCompatActivity {
         StringBuilder stringBuilder = new StringBuilder(65);
 
         //Debug
-        if (debugWindow.getVisibility() == View.INVISIBLE) stringBuilder.append("0");
-        else stringBuilder.append("1");
+//        if (debugWindow.getVisibility() == View.INVISIBLE) stringBuilder.append("0");
+//        else stringBuilder.append("1");
+//        stringBuilder.append(",");
+//        Failsafe
+        if (clearFailsafe){
+            stringBuilder.append("1");
+            clearFailsafe = false;
+        }
+        else{
+            stringBuilder.append("0");
+        }
         stringBuilder.append(",");
 
         //Calibrate
@@ -194,12 +218,20 @@ public class Flight_Controller extends AppCompatActivity {
         armCheck = (CheckBox)findViewById(R.id.arm_checkbox);
         controlCheck = (CheckBox)findViewById(R.id.control_checkbox);
         scrollCheck = (CheckBox)findViewById(R.id.autoScrollCheck);
+        logCheck = (CheckBox)findViewById(R.id.logCheck);
+        fineCheck = (CheckBox)findViewById(R.id.fineBox);
         debugWindow = (LinearLayout)findViewById(R.id.debug_window);
         debugBox = (TextView)findViewById(R.id.debug_text);
+        logBox = (TextView)findViewById(R.id.logPath);
         outputBox = (TextView)findViewById(R.id.outputWindow);
         stableText = (TextView)findViewById(R.id.stableText);
         debugBox.setMovementMethod(new ScrollingMovementMethod());
         outputBox.setMovementMethod(new ScrollingMovementMethod());
+
+        Calendar c = Calendar.getInstance();
+        time = Integer.toString(c.get(Calendar.DAY_OF_MONTH)) + "_" + Integer.toString(c.get(Calendar.HOUR_OF_DAY)) + "_" + Integer.toString(c.get(Calendar.MINUTE));
+        appendLog("RP_P,\tRP_I,\tRP_D,\tY_P,\tY_I,\tY_D");
+        appendLog(String.format("%-5s, %-5s, %-5s, %-5s, %-5s, %-5s",RP_P_FINAL,RP_I_FINAL,RP_D_FINAL,Y_P_FINAL,Y_I_FINAL,Y_D_FINAL));
 
         beginCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -210,6 +242,36 @@ public class Flight_Controller extends AppCompatActivity {
                       bluetoothOut.postDelayed(transmitRunnable, DATA_TRANSMIT_FREQUENCY);
                   } else {
                       bluetoothOut.removeCallbacks(transmitRunnable);
+                  }
+              }
+          }
+        );
+
+        fineCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                                                 @Override
+                                                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                 double amount;
+                 if (isChecked) {
+                     amount = 0.1;
+                 } else {
+                    amount = 10;
+                 }
+                 RP_P_AMOUNT    = RP_P_AMOUNT * amount ;
+                 RP_I_AMOUNT    = RP_I_AMOUNT * amount ;
+                 RP_D_AMOUNT    = RP_D_AMOUNT * amount ;
+                 Y_P_AMOUNT     = Y_P_AMOUNT  * amount ;
+                 Y_I_AMOUNT     = Y_I_AMOUNT  * amount ;
+                 Y_D_AMOUNT     = Y_D_AMOUNT  * amount ;
+             }
+         }
+        );
+
+        armCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+              @Override
+              public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                  if (isChecked) {
+                      clearFailsafe = true;
                   }
               }
           }
@@ -246,6 +308,7 @@ public class Flight_Controller extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int realProgress = 0;
+                logCheck.setChecked(false);
                     if (fromUser == true) {
                         // only allow changes by 1 up or down
                         if (((progress > (originalProgress + 10))
@@ -292,6 +355,7 @@ public class Flight_Controller extends AppCompatActivity {
                         debugBox.append(readMessage);
 
                         if (debugBox.getLineCount() >= 500) {
+                            if (logCheck.isChecked()) appendLog(debugBox.getText().toString());
                             debugBox.getEditableText().delete(0, debugBox.getLineCount() / 2);
                         }
                         if (readMessage.contains("*")) {
@@ -311,6 +375,44 @@ public class Flight_Controller extends AppCompatActivity {
             }
         };
 
+    }
+
+    public void appendLog(String text)
+    {
+//        File logFile = new File(getApplicationContext().getFilesDir(), time + ".log");
+        File logFile = new File(getApplicationContext().getExternalFilesDir(null), time + ".log");
+
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.getParentFile().mkdirs();
+                logFile.createNewFile();
+                logBox.append(logFile.getName().toString());
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                  Toast.makeText(getBaseContext(), "Error Creating Log File", Toast.LENGTH_LONG).show();
+
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(getBaseContext(), "Error Writing Log File", Toast.LENGTH_LONG).show();
+
+        }
     }
 
     @Override
@@ -371,6 +473,7 @@ public class Flight_Controller extends AppCompatActivity {
             if (bluetoothOut != null) {
                 bluetoothOut.removeCallbacks(transmitRunnable);
             }
+            if (logCheck.isChecked()) appendLog(debugBox.getText().toString());
             //Don't leave Bluetooth sockets open when leaving activity
             btSocket.close();
         } catch (IOException e2) {

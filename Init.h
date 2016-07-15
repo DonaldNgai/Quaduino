@@ -1,15 +1,5 @@
 
 void PID_init(){
-  Serial.println("Roll");
-  String output = "P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX);
-  Serial.println(output);
-  Serial.println("Pitch");
-  output = "P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX);
-  Serial.println(output);
-  Serial.println("Yaw");
-  output = "P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX);
-  Serial.println(output);
-
     //                          Kp,        Ki,         Kd           Lval         Hval
   PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
   PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
@@ -85,6 +75,13 @@ void initMPU(){
         attachInterrupt(0, dmpDataReady, RISING);
         mpuIntStatus = mpu.getIntStatus();
 
+        Serial.println(F("Roll"));
+        Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
+        Serial.println(F("Pitch"));
+        Serial.println("P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX));
+        Serial.println(F("Yaw"));
+        Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
+
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
         Serial.println(F("DMP ready! Waiting for first interrupt..."));
         dmpReady = true;
@@ -114,24 +111,24 @@ void initMPU(){
     }
 }
 
-void initBMP(){
-  if (pressure.begin())
-    Serial.println("BMP180 init success");
-    else
-    {
-      // Oops, something went wrong, this is usually a connection problem,
-      // see the comments at the top of this sketch for the proper connections.
-  
-      Serial.println("BMP180 init fail (disconnected?)\n\n");
-      while(1); // Pause forever.
-    }
-
-    baseline = getPressure();
-    
-    Serial.print("baseline pressure: ");
-    Serial.print(baseline);
-    Serial.println(" mb");  
-}
+//void initBMP(){
+//  if (pressure.begin())
+//    Serial.println("BMP180 init success");
+//    else
+//    {
+//      // Oops, something went wrong, this is usually a connection problem,
+//      // see the comments at the top of this sketch for the proper connections.
+//  
+//      Serial.println("BMP180 init fail (disconnected?)\n\n");
+//      while(1); // Pause forever.
+//    }
+//
+//    baseline = getPressure();
+//    
+//    Serial.print("baseline pressure: ");
+//    Serial.print(baseline);
+//    Serial.println(" mb");  
+//}
 
 void initMotors(){
    

@@ -3,7 +3,7 @@ unsigned long timeOfLastSignal;
 
 #define SAMPLE_TIME 13 //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
 unsigned long lastTime = millis()-SAMPLE_TIME;
-unsigned long timeChange = 0;
+unsigned int timeChange = 0;
 
 //thirty seconds
 #define FAILSAFE_THRESHOLD   30000
@@ -12,7 +12,7 @@ bool failSafe = false;
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 0.25;
+double ROLL_PID_KP = 0.145;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0;
@@ -20,7 +20,7 @@ double ROLL_PID_KD = 0;
 double ROLL_PID_MIN = -15.0;
 double ROLL_PID_MAX = 15.0;
 
-double PITCH_PID_KP = 0.25;
+double PITCH_PID_KP = 0.145;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0;
@@ -28,7 +28,7 @@ double PITCH_PID_KD = 0;
 double PITCH_PID_MIN = -15.0;
 double PITCH_PID_MAX = 15.0;
 
-double YAW_PID_KP = 0.045;
+double YAW_PID_KP = 0.027;
 double YAW_PID_KI =  0.0;
 double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
@@ -41,14 +41,11 @@ double YAW_PID_MAX = 15.0;
 PIDCont PIDroll;
 PIDCont PIDpitch;
 PIDCont PIDyaw;
-PIDCont PIDalt;
-double altitudeHold = 1; //1 Meter
 
 //Returned PID values
-int PIDroll_val;
-int PIDpitch_val;
-int PIDyaw_val;
-int PIDalt_val;
+double PIDroll_val;
+double PIDpitch_val;
+double PIDyaw_val;
 
 //Values to try to achieve
 float setY = 0;
@@ -85,8 +82,8 @@ float rollSmoothArray [filterSamples];   // array for holding raw sensor values 
 //BMP180//
 //////////
 
-SFE_BMP180 pressure;
-double baseline; // baseline pressure
+//SFE_BMP180 pressure;
+//double baseline; // baseline pressure
 
 ///////////////////////
 //BLUETOOTH VARIABLES//
@@ -96,11 +93,7 @@ String bluetoothString;
 int bluetoothInt;
 char bluetoothChar;
 
-int pIndex = -1;
-int iIndex = -1;
-int dIndex = -1;
 int endIndex = -1;
-int tIndex = -1;
 
 ///////////////////
 //MOTOR VARIABLES//

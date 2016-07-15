@@ -1,13 +1,11 @@
 // I2Cdev, MPU6050 and BMP180 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
 #include "I2Cdev.h"
-#include <SFE_BMP180.h>
 #include <Wire.h>
 #include <Servo.h>
 #include "PIDCont.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 #include "Global.h"
-#include "BMP.h"
 #include "Init.h"
 #include "Smooth.h"
 
@@ -34,15 +32,14 @@ void setup() {
 // ===                    SUPPORTING FUNCTIONS                     ===
 // ===================================================================
 
-bool debug = false;
 bool control = false;
 bool changePID = false;
-bool gotAll = false;
 
-int commaIndex = -1;
 String temp = "";
 
 void updateIndexes(){
+  int commaIndex = -1;
+
   endIndex = bluetoothString.length();
   commaIndex = bluetoothString.indexOf(',');
   temp = bluetoothString.substring(0,commaIndex);  
@@ -51,17 +48,15 @@ void updateIndexes(){
 }
 
 void processString(){
-//Debug,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+//Failsafe,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
 //,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
   int bluetoothInt;
-//    Serial.println ( "a" + bluetoothString );
-
+  
   //checksum
   bool goodCheck = false;
   updateIndexes();
   if (temp.charAt(0) == 'C')
   {
-//    Serial.println ( "b" + bluetoothString );
     if (bluetoothString.length() == temp.substring(1,temp.length()).toInt()){
       goodCheck = true;
     }
@@ -71,17 +66,18 @@ void processString(){
     bluetoothString.substring(bluetoothString.length()-1,bluetoothString.length()) == "|"
     )
   {
-//    Serial.println ( "c" + bluetoothString );
+
     timeOfLastSignal = millis();
-    //Debug
+    //Failsafe
     updateIndexes();
-    if (temp == "1") debug = true;
-    else debug = false;
+    //Flag to turn off failsafe
+    if (temp == "1") failSafe = false;
+//    else failSafe = false;
 
     //Calibrate
     updateIndexes();
     if (temp == "1") {
-        failSafe = false;
+//        failSafe = false;
         setY = yprdegree[0];
         setP = yprdegree[1];
         setR = yprdegree[2];
@@ -114,7 +110,6 @@ void processString(){
       }
     }
    
-
     //Control
     updateIndexes();
     if (temp == "1") control = true;
@@ -189,7 +184,6 @@ void processString(){
 
     //reset
     endIndex = 0;
-    commaIndex = 0;
     temp = "";
   }
       
@@ -197,24 +191,19 @@ void processString(){
 }
 
 void getBluetoothData(){
-   if (Serial.available()) 
-   {
+  if (Serial.available()) 
+  {
     while(Serial.available())
     {
-//      mpu.resetFIFO();
       bluetoothChar = Serial.read();
-//      if (!receivedAll)
+      
       bluetoothString += bluetoothChar; 
       
       if(bluetoothChar == '|')
-        {
+      {
         processString();
-//        receivedAll = true;
-        }
-//      else 
-//        {
-////        receivedAll = false;
-//        }
+        break;
+      }
     }
   }
 }
@@ -238,7 +227,6 @@ void getPIDValues(){
   RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   PIDyaw_val = PIDyaw.Compute(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180);
   
-//  PIDyaw_val = PIDyaw.Compute(setY-smoothY);
   PIDpitch_val= PIDpitch.Compute(setP-smoothP);
   PIDroll_val= PIDroll.Compute(setR-smoothR);
 
@@ -271,8 +259,6 @@ void adjustMotors(){
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
 // TODO i don't get it but putting in serial print makes the pid controller work but takig it out makes it not work
-//  if(debug){
-//  Serial.print("Y2: " + String(yprdegree[0]) + ", P: " + String(yprdegree[1]) + ", R: " + String(yprdegree[2]));
 
   Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
 //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
@@ -294,7 +280,6 @@ void adjustMotors(){
 }
 
 void updateSensors() {
-    double a,P;
     Quaternion q;           // [w, x, y, z]         quaternion container
     VectorFloat gravity;    // [x, y, z]            gravity vector
     float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
@@ -364,31 +349,32 @@ void updateSensors() {
 // ================================================================
 
 void loop(){
+  unsigned long temp = millis();
+
   //failsafe
   if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD){
     failSafe = true;
     Serial.println(F("No Signal"));
   }
+
   if (failSafe)
   Serial.println(F("FAIL!!!!!!!"));
-
   
+  //3-5 millis
   updateSensors();
+
+  //2-15 millis
   getBluetoothData();
   
-  unsigned long temp = millis();
-  timeChange = (temp - lastTime);
-//  Serial.print(F("T: "));
-//    Serial.print(timeChange);
-//    Serial.println(F(""));
+  timeChange = (millis() - lastTime);
+
   if (timeChange > SAMPLE_TIME)
   {
+    //1-3 millis
     getPIDValues();
-//    Serial.print(F("T: "));
-//    Serial.print(timeChange);
-//    Serial.println(F(""));
-    lastTime = temp;
-  }
 
+    lastTime = millis();
+  }
+  //3-10
   adjustMotors();
 }
