@@ -357,26 +357,31 @@ void loop(){
 
   if (failSafe)
   Serial.println(F("FAIL!!!!!!!"));
-  
-  //1-5 millis
-  updateSensors();
 
   //1-6 millis
   getBluetoothData();
-  
-  timeChange = (millis() - lastTime);
 
-  if (timeChange > SAMPLE_TIME)
+//  Serial.print(F("T5: "));
+//  Serial.print(millis()-lastTime);
+//  Serial.println(F(""));
+  //make sure to wait until 50Hz
+  while (timeChange < SAMPLE_TIME)
   {
-    //1-3 millis
-    getPIDValues();
-
-    lastTime = millis();
+    timeChange = (millis() - lastTime);
   }
+  
+  //1-5 millis
+  updateSensors();
+  //1-3 millis
+  getPIDValues();
+
+  lastTime = millis();
+  
   //5-12
   adjustMotors();
 
-  Serial.print(F("T5: "));
-  Serial.print(millis()-temp);
-  Serial.println(F(""));
+//10-18 millis
+//  Serial.print(F("T5: "));
+//  Serial.print(millis()-temp);
+//  Serial.println(F(""));
 }

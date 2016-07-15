@@ -121,11 +121,11 @@ Servo MOTOR4;
 //#define MOTOR_RUN_LEVEL 630
 ////Value at which motors are not moving
 //#define MOTOR_ZERO_LEVEL 620
-#define MAX_SIGNAL 2300
+#define MAX_SIGNAL 1460
 //Minimum Value before motors begin spinning
-#define MOTOR_RUN_LEVEL 800
+#define MOTOR_RUN_LEVEL 580
 //Value at which motors are not moving
-#define MOTOR_ZERO_LEVEL 700
+#define MOTOR_ZERO_LEVEL 550
 
 /////////////////
 //LED VARIABLES//

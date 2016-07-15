@@ -141,16 +141,16 @@ void initMotors(){
   MOTOR3.attach(MOTOR3PIN);
   MOTOR4.attach(MOTOR4PIN);
   //Arm motor
-  throttle = map(0,0,100,0,179);
+  throttle = map(0,0,100,MOTOR_ZERO_LEVEL,MAX_SIGNAL);
 
 //  analogWrite(MOTOR1,throttle);
 //  analogWrite(MOTOR2,throttle);
 //  analogWrite(MOTOR3,throttle);
 //  analogWrite(MOTOR4,throttle);
-  MOTOR1.write(throttle);
-  MOTOR2.write(throttle);
-  MOTOR3.write(throttle);
-  MOTOR4.write(throttle);
+  MOTOR1.writeMicroseconds(throttle);
+  MOTOR2.writeMicroseconds(throttle);
+  MOTOR3.writeMicroseconds(throttle);
+  MOTOR4.writeMicroseconds(throttle);
   Serial.println("Now writing minimum output to arm motors.");
 }
 
