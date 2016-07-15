@@ -100,12 +100,12 @@ void processString(){
     updateIndexes();
     bluetoothInt = temp.toInt();
     if (failSafe){
-      throttle = map(0,0,100,0,179);
+      throttle = map(0,0,100,MOTOR_ZERO_LEVEL,MAX_SIGNAL);
     }
     else{
        if (bluetoothInt <= 100 && bluetoothInt >= 0){
 //      throttle = map(bluetoothInt,0,100,620,765);
-        throttle = map(bluetoothInt,0,100,0,MAX_SIGNAL);
+        throttle = map(bluetoothInt,0,100,MOTOR_ZERO_LEVEL,MAX_SIGNAL);
 
       }
     }
@@ -213,7 +213,6 @@ int YinIndex,PinIndex,RinIndex;
 
 void getPIDValues(){
   
-//  PIDyaw_val= (int)PIDyaw.Compute((float)setY-yprdegree[0]);
   smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,YinIndex);
   smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
   smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
@@ -235,11 +234,11 @@ void getPIDValues(){
 }
 
 void adjustMotors(){
-  int m1_val=throttle+PIDroll_val+PIDpitch_val+PIDyaw_val;
-  int m2_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
+  double m1_val=throttle+PIDroll_val+PIDpitch_val+PIDyaw_val;
+  double m2_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
 //  int m2_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
-  int m3_val=throttle-PIDroll_val-PIDpitch_val+PIDyaw_val;
-  int m4_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
+  double m3_val=throttle-PIDroll_val-PIDpitch_val+PIDyaw_val;
+  double m4_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
 //  int m4_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
 
   if (throttle == MOTOR_ZERO_LEVEL) m1_val = MOTOR_ZERO_LEVEL;
@@ -269,10 +268,10 @@ void adjustMotors(){
 
 //  }
 
-    MOTOR1.write(m1_val);
-    MOTOR2.write(m2_val);
-    MOTOR3.write(m3_val);
-    MOTOR4.write(m4_val);
+    MOTOR1.writeMicroseconds(m1_val);
+    MOTOR2.writeMicroseconds(m2_val);
+    MOTOR3.writeMicroseconds(m3_val);
+    MOTOR4.writeMicroseconds(m4_val);
 //  analogWrite(MOTOR1,m1_val);
 //  analogWrite(MOTOR2,m2_val);
 //  analogWrite(MOTOR3,m3_val);
@@ -339,7 +338,6 @@ void updateSensors() {
             yprdegree[1] = (ypr[1] * 180/M_PI);
             yprdegree[2] = (ypr[2] * 180/M_PI);
             
-
         }
     }
 }
@@ -360,10 +358,10 @@ void loop(){
   if (failSafe)
   Serial.println(F("FAIL!!!!!!!"));
   
-  //3-5 millis
+  //1-5 millis
   updateSensors();
 
-  //2-15 millis
+  //1-6 millis
   getBluetoothData();
   
   timeChange = (millis() - lastTime);
@@ -375,6 +373,10 @@ void loop(){
 
     lastTime = millis();
   }
-  //3-10
+  //5-12
   adjustMotors();
+
+  Serial.print(F("T5: "));
+  Serial.print(millis()-temp);
+  Serial.println(F(""));
 }
