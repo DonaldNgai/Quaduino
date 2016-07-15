@@ -365,11 +365,12 @@ void loop(){
 //  Serial.print(millis()-lastTime);
 //  Serial.println(F(""));
   //make sure to wait until 50Hz
+  timeChange = (millis() - lastTime);
   while (timeChange < SAMPLE_TIME)
   {
     timeChange = (millis() - lastTime);
   }
-  
+
   //1-5 millis
   updateSensors();
   //1-3 millis
