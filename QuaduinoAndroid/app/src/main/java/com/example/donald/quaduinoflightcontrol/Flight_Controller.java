@@ -96,19 +96,19 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
     //What the starting PID values should be
-    public final double RP_P_FINAL = 0.33;
+    public final double RP_P_FINAL = 2.0;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
     public final double Y_P_FINAL = 0.027;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
     //How much to increase values when changing
-    public double RP_P_AMOUNT = 0.01;
-    public double RP_I_AMOUNT = 0.0001;
-    public double RP_D_AMOUNT = 0.0001;
-    public double Y_P_AMOUNT = 0.001;
-    public double Y_I_AMOUNT = 0.0001;
-    public double Y_D_AMOUNT = 0.00001;
+    public double RP_P_AMOUNT = 0.05;
+    public double RP_I_AMOUNT = 0.05;
+    public double RP_D_AMOUNT = 0.05;
+    public double Y_P_AMOUNT = 0.5;
+    public double Y_I_AMOUNT = 0.05;
+    public double Y_D_AMOUNT = 0.05;
 
     public SeekBar throttleBar;
 

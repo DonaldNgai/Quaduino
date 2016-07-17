@@ -12,21 +12,21 @@ bool failSafe = false;
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 0.33;
+double ROLL_PID_KP = 2.0;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0;
 double ROLL_PID_KD = 0;
-double ROLL_PID_MIN = -15.0;
-double ROLL_PID_MAX = 15.0;
+double ROLL_PID_MIN = -100.0;
+double ROLL_PID_MAX = 100.0;
 
-double PITCH_PID_KP = 0.33;
+double PITCH_PID_KP = 2.0;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0;
 double PITCH_PID_KD = 0;
-double PITCH_PID_MIN = -15.0;
-double PITCH_PID_MAX = 15.0;
+double PITCH_PID_MIN = -100.0;
+double PITCH_PID_MAX = 100.0;
 
 double YAW_PID_KP = 0.027;
 double YAW_PID_KI =  0.0;
@@ -34,8 +34,8 @@ double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
 //double YAW_PID_KI =  0.500;
 //double YAW_PID_KD = 0.0001;
-double YAW_PID_MIN = -15.0;
-double YAW_PID_MAX = 15.0;
+double YAW_PID_MIN = -100.0;
+double YAW_PID_MAX = 100.0;
 
 //Define the PID class
 PIDCont PIDroll;
