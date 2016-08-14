@@ -67,11 +67,12 @@ void processString(){
     )
   {
 
-    timeOfLastSignal = millis();
+    timeOfLastSignal = micros();
     //Failsafe
     updateIndexes();
     //Flag to turn off failsafe
     if (temp == "1") failSafe = false;
+//failSafe = false;
 //    else failSafe = false;
 
     //Calibrate
@@ -208,7 +209,7 @@ void getBluetoothData(){
   }
 }
 
-double smoothY,smoothP,smoothR;
+int smoothY,smoothP,smoothR;
 int YinIndex,PinIndex,RinIndex;
 
 void getPIDValues(){
@@ -216,29 +217,34 @@ void getPIDValues(){
   smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,YinIndex);
   smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
   smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
+
+//  smoothY = yprdegree[0];
+//  smoothP = yprdegree[1];
+//  smoothR = yprdegree[2];
+  
   //failsafe while debugging
-  if (abs(smoothP)+ abs(smoothR) > 48){
+  if (abs(smoothP) + abs(smoothR) > CRAZY_ANGLE_THRESHOLD){
     failSafe = true;
     Serial.println(F("Crazy Angle"));
   }
+  
   YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  PIDyaw_val = PIDyaw.Compute(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180);
   
-  PIDpitch_val= PIDpitch.Compute(setP-smoothP);
-  PIDroll_val= PIDroll.Compute(setR-smoothR);
-
-//  Serial.println("YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
+//  PIDyaw_val = (int)PIDyaw.Compute(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180);
+  PIDyaw_val = (int)PIDyaw.Compute(wrap_180(smoothY-setY));
+  PIDpitch_val= (int)PIDpitch.Compute(setP-smoothP);
+  PIDroll_val= (int)PIDroll.Compute(setR-smoothR);
 
 }
 
 void adjustMotors(){
-  double m1_val=throttle+PIDroll_val+PIDpitch_val+PIDyaw_val;
-  double m2_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
+  m1_val =throttle+PIDroll_val+PIDpitch_val+PIDyaw_val;
+  m2_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
 //  int m2_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
-  double m3_val=throttle-PIDroll_val-PIDpitch_val+PIDyaw_val;
-  double m4_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
+  m3_val=throttle-PIDroll_val-PIDpitch_val+PIDyaw_val;
+  m4_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;
 //  int m4_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
 
   if (throttle == MOTOR_ZERO_LEVEL) m1_val = MOTOR_ZERO_LEVEL;
@@ -257,17 +263,6 @@ void adjustMotors(){
   else if (m4_val < MOTOR_RUN_LEVEL) m4_val = MOTOR_RUN_LEVEL;
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
-// TODO i don't get it but putting in serial print makes the pid controller work but takig it out makes it not work
-
-  Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
-//  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
-//  Serial.println(" setY: " + String(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
-  Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
-  Serial.println(" PIDY: " + String(PIDyaw_val) + " PIDP: " + String(PIDpitch_val) + " PIDR: " + String(PIDroll_val));
-  Serial.print(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
-  Serial.println(" F:" + String(failSafe));
-
-//  }
 
     MOTOR1.writeMicroseconds(m1_val);
     MOTOR2.writeMicroseconds(m2_val);
@@ -335,9 +330,9 @@ void updateSensors() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            yprdegree[0] = (ypr[0] * 180/M_PI);
-            yprdegree[1] = (ypr[1] * 180/M_PI);
-            yprdegree[2] = (ypr[2] * 180/M_PI);
+            yprdegree[0] = int((ypr[0] * 180/M_PI)*SCALING_FACTOR);
+            yprdegree[1] = int((ypr[1] * 180/M_PI)*SCALING_FACTOR);
+            yprdegree[2] = int((ypr[2] * 180/M_PI)*SCALING_FACTOR);
             
         }
     }
@@ -348,42 +343,75 @@ void updateSensors() {
 // ================================================================
 
 void loop(){
-  unsigned long temp = millis();
+  unsigned long temp = micros();
+  
 
   //failsafe
-  if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD){
+  if (micros() - timeOfLastSignal > FAILSAFE_THRESHOLD){
     failSafe = true;
     Serial.println(F("No Signal"));
   }
 
-  if (failSafe)
-  Serial.println(F("FAIL!!!!!!!"));
+  if (failSafe) {Serial.println(F("FAIL!!!!!!!"));}
+  
+    //1-6 millis
+  if (micros()-lastTime >= SAMPLE_TIME){
+    lastBluetooth++;
 
-  //1-6 millis
-  getBluetoothData();
+    if (lastBluetooth >= BLUETOOTH_READLOOPS){
+      //3500 Micro, max 4500
+      getBluetoothData();
+      lastBluetooth = 0;
+
+//          Serial.print("A");
+//          Serial.println(micros()-temp);
+//          temp = micros();
+      
+      //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
+      //  Serial.println(" setY: " + String(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
+    
+//      Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
+      
+      Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+      Serial.print(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+
+      Serial.println(" PIDY: " + String(PIDyaw_val) + " PIDP: " + String(PIDpitch_val) + " PIDR: " + String(PIDroll_val));
+
+      //  Serial.println("YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
+
+      Serial.println(" F:" + String(failSafe));
+    }
+//    Serial.print("B");
+//    Serial.println(micros()-temp);
+//    temp = micros();
+    
+    //3000 Micro, max 4000
+    updateSensors();
+//    Serial.print("C");
+//    Serial.println(micros()-temp);
+//    temp = micros();
+    //400 Micro, Max 512
+    getPIDValues();
+//    Serial.print("D");
+//    Serial.println(micros()-temp);
+//    temp = micros();
+    //36 Micro, Max 64
+    adjustMotors();
+//    Serial.print("E");
+//    Serial.println(micros()-temp);
+    Serial.print("G");
+    Serial.println(micros()-lastTime);
+    lastTime = micros();
+  }
+  
 
 //  Serial.print(F("T5: "));
-//  Serial.print(millis()-lastTime);
+//  Serial.print(micros()-lastTime);
 //  Serial.println(F(""));
   //make sure to wait until 50Hz
-  timeChange = (millis() - lastTime);
-  while (timeChange < SAMPLE_TIME)
-  {
-    timeChange = (millis() - lastTime);
-  }
-
-  //1-5 millis
-  updateSensors();
-  //1-3 millis
-  getPIDValues();
-
-  lastTime = millis();
-  
-  //5-12
-  adjustMotors();
-
-//10-18 millis
-//  Serial.print(F("T5: "));
-//  Serial.print(millis()-temp);
-//  Serial.println(F(""));
+//  timeChange = (micros() - lastTime);
+//  while (timeChange < SAMPLE_TIME)
+//  {
+//    timeChange = (micros() - lastTime);
+//  }
 }

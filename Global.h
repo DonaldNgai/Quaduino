@@ -1,18 +1,27 @@
+#define SCALING_FACTOR 100
+
+#define wrap_180(x) (x < -180 ? x+360 : (x > 180 ? x - 360: x))
+#define CRAZY_ANGLE_THRESHOLD 48 * SCALING_FACTOR
 //#define debug
 unsigned long timeOfLastSignal;
 
-#define SAMPLE_TIME 20 //50HZ //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
-unsigned long lastTime = millis()-SAMPLE_TIME;
+//#define SAMPLE_TIME 2500 //400Hz //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
+#define SAMPLE_TIME 2500 //50Hz
+unsigned long lastTime = 0;
+unsigned int lastBluetooth = 0; // Counts the number of main loops have passed since the last bluetooth read
+#define BLUETOOTH_FREQUENCY 50
+#define BLUETOOTH_READTIME 1000000/BLUETOOTH_FREQUENCY //50Hz
+#define BLUETOOTH_READLOOPS BLUETOOTH_READTIME/SAMPLE_TIME // Number of times to loop main loop before reading
 unsigned int timeChange = 0;
 
 //thirty seconds
-#define FAILSAFE_THRESHOLD   30000
+#define FAILSAFE_THRESHOLD   30000000
 bool failSafe = false;
 /////////////////
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 2.0;
+double ROLL_PID_KP = 0.02;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0;
@@ -20,7 +29,7 @@ double ROLL_PID_KD = 0;
 double ROLL_PID_MIN = -100.0;
 double ROLL_PID_MAX = 100.0;
 
-double PITCH_PID_KP = 2.0;
+double PITCH_PID_KP = 0.02;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0;
@@ -28,7 +37,7 @@ double PITCH_PID_KD = 0;
 double PITCH_PID_MIN = -100.0;
 double PITCH_PID_MAX = 100.0;
 
-double YAW_PID_KP = 0.027;
+double YAW_PID_KP = 0.0027;
 double YAW_PID_KI =  0.0;
 double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
@@ -43,17 +52,17 @@ PIDCont PIDpitch;
 PIDCont PIDyaw;
 
 //Returned PID values
-double PIDroll_val;
-double PIDpitch_val;
-double PIDyaw_val;
+int PIDroll_val;
+int PIDpitch_val;
+int PIDyaw_val;
 
 //Values to try to achieve
-float setY = 0;
-float setP = 0;
-float setR = 0;
-float prevY = 0;
-float prevP = 0;
-float prevR = 0;
+int setY = 0;
+int setP = 0;
+int setR = 0;
+int prevY = 0;
+int prevP = 0;
+int prevR = 0;
 
 ///////////
 //MPU6050//
@@ -70,13 +79,13 @@ uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 // orientation/motion vars
-float yprdegree[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+int yprdegree[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 //Variables to smooth data from MPU6050
-#define filterSamples   9              // filterSamples should  be an odd number, no smaller than 3
-float yawSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
-float pitchSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
-float rollSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+#define filterSamples   3              // filterSamples should  be an odd number, no smaller than 3
+int yawSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+int pitchSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+int rollSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 
 //////////
 //BMP180//

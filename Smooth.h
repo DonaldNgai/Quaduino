@@ -2,11 +2,11 @@
 // ===                    DATA SMOOTHING FUNCTION                     ===
 // ======================================================================
 
-double digitalSmooth(float rawIn, float *sensSmoothArray, int inIndex){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
+int digitalSmooth(int rawIn, int *sensSmoothArray, int inIndex){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
   int j, k, top, bottom;
-  double temp, total;
+  int temp, total;
  // static int raw[filterSamples];
-  static double sorted[filterSamples];
+  static int sorted[filterSamples];
   boolean done;
 
   sensSmoothArray[inIndex] = rawIn;                 // input new data into the oldest slot
