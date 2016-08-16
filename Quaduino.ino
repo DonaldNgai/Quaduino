@@ -26,6 +26,7 @@ void setup() {
     // configure LED for output
     pinMode(LED_PIN, OUTPUT);
 
+    timeOfLastSignal = millis();
 }
 
 // ===================================================================
@@ -58,6 +59,7 @@ void processString(){
   if (temp.charAt(0) == 'C')
   {
     if (bluetoothString.length() == temp.substring(1,temp.length()).toInt()){
+      Serial.println(bluetoothString.length());
       goodCheck = true;
     }
   }
@@ -67,7 +69,7 @@ void processString(){
     )
   {
 
-    timeOfLastSignal = micros();
+    timeOfLastSignal = millis();
     //Failsafe
     updateIndexes();
     //Flag to turn off failsafe
@@ -136,38 +138,50 @@ void processString(){
 
     //Roll and Pitch PID
     updateIndexes();
+    if(changePID){
     temp.toCharArray(floatbuf, sizeof(floatbuf));
     toChange = atof(floatbuf);
     ROLL_PID_KP = toChange;
     PITCH_PID_KP = toChange;
+    }
     updateIndexes();
+    if(changePID){
     temp.toCharArray(floatbuf, sizeof(floatbuf));
     toChange = atof(floatbuf);
     ROLL_PID_KI = toChange;
     PITCH_PID_KI = toChange;
+    }
     updateIndexes();
+    if(changePID){
     temp.toCharArray(floatbuf, sizeof(floatbuf));
     toChange = atof(floatbuf);
     ROLL_PID_KD = toChange;
     PITCH_PID_KD = toChange;
-
+    }
     //YAW PID
     updateIndexes();
+    if(changePID){
     temp.toCharArray(floatbuf, sizeof(floatbuf));
     toChange = atof(floatbuf);
     YAW_PID_KP = toChange;
+    }
     updateIndexes();
+    if(changePID){
     temp.toCharArray(floatbuf, sizeof(floatbuf));
     toChange = atof(floatbuf);
     YAW_PID_KI = toChange;
+    }
     updateIndexes();
+    if(changePID){
     temp.toCharArray(floatbuf, sizeof(floatbuf));
     toChange = atof(floatbuf);
     YAW_PID_KD = toChange;
+    }
 
     //SET PID
     //                  //                          Kp,        Ki,         Kd           Lval         Hval
     if (changePID){
+      
       PIDroll.resetI();
       PIDpitch.resetI();
       PIDyaw.resetI();
@@ -175,12 +189,12 @@ void processString(){
       PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
       PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
 
-      Serial.println(F("Roll"));
-      Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
-      Serial.println(F("Pitch"));
-      Serial.println("P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX));
-      Serial.println(F("Yaw"));
-      Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
+//      Serial.println(F("Roll"));
+//      Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
+//      Serial.println(F("Pitch"));
+//      Serial.println("P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX));
+//      Serial.println(F("Yaw"));
+//      Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
     }
 
     //reset
@@ -194,8 +208,10 @@ void processString(){
 void getBluetoothData(){
   if (Serial.available()) 
   {
-    while(Serial.available())
+    int byteCounter = 0;
+    while(Serial.available() && byteCounter < bluetoothDataLength)
     {
+      byteCounter++;
       bluetoothChar = Serial.read();
       
       bluetoothString += bluetoothChar; 
@@ -213,24 +229,6 @@ int smoothY,smoothP,smoothR;
 int YinIndex,PinIndex,RinIndex;
 
 void getPIDValues(){
-  
-  smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,YinIndex);
-  smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
-  smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
-
-//  smoothY = yprdegree[0];
-//  smoothP = yprdegree[1];
-//  smoothR = yprdegree[2];
-  
-  //failsafe while debugging
-  if (abs(smoothP) + abs(smoothR) > CRAZY_ANGLE_THRESHOLD){
-    failSafe = true;
-    Serial.println(F("Crazy Angle"));
-  }
-  
-  YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
   
 //  PIDyaw_val = (int)PIDyaw.Compute(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180);
   PIDyaw_val = (int)PIDyaw.Compute(wrap_180(smoothY-setY));
@@ -274,7 +272,7 @@ void adjustMotors(){
 //  analogWrite(MOTOR4,m4_val);
 }
 
-void updateSensors() {
+void updateOrientationData() {
     Quaternion q;           // [w, x, y, z]         quaternion container
     VectorFloat gravity;    // [x, y, z]            gravity vector
     float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
@@ -296,13 +294,16 @@ void updateSensors() {
 //      #endif
 //    }
 //    while (!mpuInterrupt && fifoCount < packetSize);
+
+  // get current FIFO count
+  fifoCount = mpu.getFIFOCount();
+  while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
   if (mpu.getFIFOCount() >= packetSize)
   {
     // reset interrupt flag and get INT_STATUS byte
     mpuInterrupt = false;
     mpuIntStatus = mpu.getIntStatus();
 
-    // get current FIFO count
     fifoCount = mpu.getFIFOCount();
   
     // check for overflow (this should never happen unless our code is too inefficient)
@@ -317,8 +318,10 @@ void updateSensors() {
       else if (mpuIntStatus & 0x02) 
         {
         // wait for correct available data length, should be a VERY short wait
-//        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+        
 
+        // Remove all the old data - maybe need to do -1
+        mpu.getFIFOBytes(fifoBuffer, fifoCount - packetSize);
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
         mpu.resetFIFO();
@@ -333,9 +336,41 @@ void updateSensors() {
             yprdegree[0] = int((ypr[0] * 180/M_PI)*SCALING_FACTOR);
             yprdegree[1] = int((ypr[1] * 180/M_PI)*SCALING_FACTOR);
             yprdegree[2] = int((ypr[2] * 180/M_PI)*SCALING_FACTOR);
+
+            smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,YinIndex);
+            smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
+            smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
+  
+            //failsafe while debugging
+            if (abs(smoothP) + abs(smoothR) > CRAZY_ANGLE_THRESHOLD){
+              failSafe = true;
+              Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+              Serial.println(F("Crazy Angle"));
+            }
             
+            YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+            PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+            RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+                        
         }
     }
+}
+
+int gx_aver,gy_aver,gz_aver;
+int GXIndex,GYIndex,GZIndex;
+
+void updateGyroData(){
+  
+  mpu.getRotation(&gyroX,&gyroY,&gyroZ);
+
+  gx_aver = digitalSmooth(gyroX,gyroXSmoothArray,GXIndex);
+  gy_aver = digitalSmooth(gyroY,gyroYSmoothArray,GYIndex);
+  gz_aver = digitalSmooth(gyroZ,gyroZSmoothArray,GZIndex);
+
+  GXIndex = (GXIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  GYIndex = (GYIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  GZIndex = (GZIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  
 }
 
 // ================================================================
@@ -343,65 +378,58 @@ void updateSensors() {
 // ================================================================
 
 void loop(){
-  unsigned long temp = micros();
-  
 
   //failsafe
-  if (micros() - timeOfLastSignal > FAILSAFE_THRESHOLD){
+  if (millis() - timeOfLastSignal > FAILSAFE_THRESHOLD){
     failSafe = true;
     Serial.println(F("No Signal"));
   }
 
   if (failSafe) {Serial.println(F("FAIL!!!!!!!"));}
-  
+  unsigned long temp = 0;
     //1-6 millis
-  if (micros()-lastTime >= SAMPLE_TIME){
-    lastBluetooth++;
-
-    if (lastBluetooth >= BLUETOOTH_READLOOPS){
-      //3500 Micro, max 4500
-      getBluetoothData();
-      lastBluetooth = 0;
-
-//          Serial.print("A");
-//          Serial.println(micros()-temp);
-//          temp = micros();
-      
-      //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
-      //  Serial.println(" setY: " + String(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
+  if (millis()-slowLoopTimer >= SLOW_SAMPLE_TIME){
+      temp = micros();
+    getBluetoothData();
+    Serial.print("A");
+    Serial.println(micros()-temp);
+    //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
+    //  Serial.println(" setY: " + String(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
     
-//      Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
+    //  Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
       
-      Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
-      Serial.print(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+    //  Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+//      Serial.print(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
 
       Serial.println(" PIDY: " + String(PIDyaw_val) + " PIDP: " + String(PIDpitch_val) + " PIDR: " + String(PIDroll_val));
 
-      //  Serial.println("YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
+    //  Serial.println("YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
 
-      Serial.println(" F:" + String(failSafe));
-    }
-//    Serial.print("B");
-//    Serial.println(micros()-temp);
-//    temp = micros();
+    Serial.println(" F:" + String(failSafe));
+
     
     //3000 Micro, max 4000
-    updateSensors();
-//    Serial.print("C");
-//    Serial.println(micros()-temp);
-//    temp = micros();
+
+    updateOrientationData();
+
+    Serial.print("B");
+    Serial.println(micros()-temp);
+    slowLoopTimer = millis();
+  }
+
+  if (micros()-fastLoopTimer >= FAST_SAMPLE_TIME){
+    temp = micros();
+
+    
     //400 Micro, Max 512
     getPIDValues();
-//    Serial.print("D");
-//    Serial.println(micros()-temp);
-//    temp = micros();
     //36 Micro, Max 64
     adjustMotors();
-//    Serial.print("E");
-//    Serial.println(micros()-temp);
-    Serial.print("G");
-    Serial.println(micros()-lastTime);
-    lastTime = micros();
+    Serial.print("D");
+    Serial.println(micros()-temp);
+
+    updateGyroData();
+    fastLoopTimer = micros();
   }
   
 

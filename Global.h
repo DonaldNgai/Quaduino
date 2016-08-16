@@ -5,17 +5,14 @@
 //#define debug
 unsigned long timeOfLastSignal;
 
-//#define SAMPLE_TIME 2500 //400Hz //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
-#define SAMPLE_TIME 2500 //50Hz
-unsigned long lastTime = 0;
-unsigned int lastBluetooth = 0; // Counts the number of main loops have passed since the last bluetooth read
-#define BLUETOOTH_FREQUENCY 50
-#define BLUETOOTH_READTIME 1000000/BLUETOOTH_FREQUENCY //50Hz
-#define BLUETOOTH_READLOOPS BLUETOOTH_READTIME/SAMPLE_TIME // Number of times to loop main loop before reading
+#define FAST_SAMPLE_TIME 1250 //400Hz using Micros() //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
+#define SLOW_SAMPLE_TIME 20 //50Hz using Millis()
+unsigned long slowLoopTimer = 0;
+unsigned long fastLoopTimer = 0;
 unsigned int timeChange = 0;
 
 //thirty seconds
-#define FAILSAFE_THRESHOLD   30000000
+#define FAILSAFE_THRESHOLD   30000
 bool failSafe = false;
 /////////////////
 //PID VARIABLES//
@@ -80,12 +77,21 @@ uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 // orientation/motion vars
 int yprdegree[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+int gyroX;
+int gyroY;
+int gyroZ;
 
 //Variables to smooth data from MPU6050
-#define filterSamples   3              // filterSamples should  be an odd number, no smaller than 3
+#define filterSamples   17              // filterSamples should  be an odd number, no smaller than 3
 int yawSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 int pitchSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 int rollSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+
+int gyroXSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+int gyroYSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+int gyroZSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+
+#define bluetoothDataLength 70
 
 //////////
 //BMP180//
