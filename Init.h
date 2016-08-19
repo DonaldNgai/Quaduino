@@ -4,7 +4,8 @@ void PID_init(){
   PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
   PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
   PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
-//  PIDalt.ChangeParameters(ALT_PID_KP,ALT_PID_KI,ALT_PID_KD,ALT_PID_MIN,ALT_PID_MAX);
+  PIDangleX.ChangeParameters(ANGLEX_KP,ANGLEX_KI,ANGLEX_KD,ANGLEX_MIN,ANGLEX_MAX);
+  PIDangleY.ChangeParameters(ANGLEY_KP,ANGLEY_KI,ANGLEY_KD,ANGLEY_MIN,ANGLEY_MAX); 
 }
 
 void initCommunication()
@@ -43,37 +44,37 @@ void initMPU(){
     Serial.println(F("Testing device connections..."));
     Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
     
-   // wait for ready
-    Serial.println(F("\nSend any character to initialize DMP"));
-     while (Serial.available() && Serial.read()); // empty buffer
-     while (!Serial.available());                 // wait for data
-     while (Serial.available() && Serial.read()){// empty buffer again
-    } 
-
-    // load and configure the DMP
-    Serial.println(F("Initializing DMP..."));
-    devStatus = mpu.dmpInitialize();
+//   // wait for ready
+//    Serial.println(F("\nSend any character to initialize DMP"));
+//     while (Serial.available() && Serial.read()); // empty buffer
+////     while (!Serial.available());                 // wait for data
+//     while (Serial.available() && Serial.read()){// empty buffer again
+//    } 
+//
+//    // load and configure the DMP
+//    Serial.println(F("Initializing DMP..."));
+//    devStatus = mpu.dmpInitialize();
 
 //Your offsets:  1832 880 1041 42 -33 19
 
 //For my own chip
-    mpu.setXGyroOffset(42);
-    mpu.setYGyroOffset(-33);
-    mpu.setZGyroOffset(19);
-    mpu.setXAccelOffset(1832);
-    mpu.setYAccelOffset(880);
-    mpu.setZAccelOffset(1041);
+    mpu.setXGyroOffset(GYRO_X_OFFSET);
+    mpu.setYGyroOffset(GYRO_Y_OFFSET);
+    mpu.setZGyroOffset(GYRO_Z_OFFSET);
+    mpu.setXAccelOffset(ACC_X_OFFSET);
+    mpu.setYAccelOffset(ACC_Y_OFFSET);
+    mpu.setZAccelOffset(ACC_Z_OFFSET);
 
     // make sure it worked (returns 0 if so)
-    if (devStatus == 0) {
+    if (mpu.testConnection()) {
         // turn on the DMP, now that it's ready
-        Serial.println(F("Enabling DMP..."));
-        mpu.setDMPEnabled(true);
+//        Serial.println(F("Enabling DMP..."));
+//        mpu.setDMPEnabled(true);
 
         // enable Arduino interrupt detection
-        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-        attachInterrupt(0, dmpDataReady, RISING);
-        mpuIntStatus = mpu.getIntStatus();
+//        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+//        attachInterrupt(0, dmpDataReady, RISING);
+//        mpuIntStatus = mpu.getIntStatus();
 
         Serial.println(F("Roll"));
         Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
@@ -83,14 +84,14 @@ void initMPU(){
         Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
-        dmpReady = true;
+//        Serial.println(F("DMP ready! Waiting for first interrupt..."));
+//        dmpReady = true;
 
         // get expected DMP packet size for later comparison
-        packetSize = mpu.dmpGetFIFOPacketSize();
-        Serial.println(F("Waiting for DMP to stablilize"));
+//        packetSize = mpu.dmpGetFIFOPacketSize();
+//        Serial.println(F("Waiting for DMP to stablilize"));
 
-        delay(20000);
+        delay(MPU_STABLE_DELAY);
         Serial.println(F("*********************************************************************************"));
 
         setY = yprdegree[0];
@@ -100,15 +101,16 @@ void initMPU(){
         prevP = setP;
         prevR = setR;
         
-    } else {
-        // ERROR!
-        // 1 = initial memory load failed
-        // 2 = DMP configuration updates failed
-        // (if it's going to break, usually the code will be 1)
-        Serial.print(("DMP Initialization failed (code "));
-        Serial.print(devStatus);
-        Serial.println(F(")"));
-    }
+    } 
+//    else {
+//        // ERROR!
+//        // 1 = initial memory load failed
+//        // 2 = DMP configuration updates failed
+//        // (if it's going to break, usually the code will be 1)
+//        Serial.print(("DMP Initialization failed (code "));
+//        Serial.print(devStatus);
+//        Serial.println(F(")"));
+//    }
 }
 
 //void initBMP(){
