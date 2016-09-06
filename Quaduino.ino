@@ -35,6 +35,7 @@ void setup() {
 
 bool rateAndControl = false;
 bool changePID = false;
+bool debug = false;
 
 String temp = "";
 
@@ -49,7 +50,7 @@ void updateIndexes(){
 }
 
 void processString(){
-//Failsafe,Calibrate,PID,Throttle,rateAndControl,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+//Failsafe,Debug,PID,Throttle,rateAndControl,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
 //,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
   int bluetoothInt;
   
@@ -76,6 +77,11 @@ void processString(){
     if (temp == "1") failSafe = false;
 //failSafe = false;
 //    else failSafe = false;
+
+    //Debug
+    updateIndexes();
+    if (temp == "1") debug = true;
+    else debug = false;
 
     //Calibrate
 //    updateIndexes();
@@ -377,19 +383,19 @@ void adjustMotors(){
 // ===                    MAIN PROGRAM LOOP                     ===
 // ================================================================
 void printStuff(){
-  if (millis() - printTimer > PRINT_TIME){
+  if (debug && millis() - printTimer > PRINT_TIME){
     //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
     //  Serial.println(" setY: " + String(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
     
-//      Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
-      Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
+      Serial.print("M1:" + String(m1_val) + "M2:" + String(m2_val) + "M3:" + String(m3_val) + "M4:" + String(m4_val));
+      Serial.print("setY:" + String(setY) + "setP: " + String(setP) + "setR: " + String(setR));
 
 //      Serial.print(" setY: " + String(receivedYaw) + " setP: " + String(receivedPitch) + " setR: " + String(receivedRoll));
-      Serial.print(" P: " + String(angles[0]) + " R: " + String(angles[1]));
+//      Serial.print("P:" + String(angles[0]) + " R:" + String(angles[1]));
 
-      Serial.print(" smGY: " + String(gz_aver) + " smGP: " + String(gy_aver) + " smGR: " + String(gx_aver));
+      Serial.print("smGY:" + String(gz_aver) + "smGP:" + String(gy_aver) + "smGR:" + String(gx_aver));
 
-      Serial.print(" PIDY: " + String(PIDyaw_val) + " PIDP: " + String(PIDpitch_val) + " PIDR: " + String(PIDroll_val));
+      Serial.print("PIDY:" + String(PIDyaw_val) + "PIDP:" + String(PIDpitch_val) + "PIDR:" + String(PIDroll_val));
 
       //Needed so that the phone knows to reset throttle when failsafe is triggered by drone
       Serial.println(" F:" + String(failSafe));

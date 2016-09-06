@@ -132,14 +132,10 @@ public class Flight_Controller extends AppCompatActivity {
 
     public void sendData(){
         //Data string is of the form
-        //CheckSum,Failsafe,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+        //CheckSum,Failsafe,Debug,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
         //0,1,1,15,23.96,21.29,30.21,3.431,2.231,1.213,3.213,2.213,1.321|
         StringBuilder stringBuilder = new StringBuilder(65);
 
-        //Debug
-//        if (debugWindow.getVisibility() == View.INVISIBLE) stringBuilder.append("0");
-//        else stringBuilder.append("1");
-//        stringBuilder.append(",");
 //        Failsafe
         if (clearFailsafe){
             stringBuilder.append("1");
@@ -148,6 +144,11 @@ public class Flight_Controller extends AppCompatActivity {
         else{
             stringBuilder.append("0");
         }
+        stringBuilder.append(",");
+
+        //Debug
+        if (debugBox.getVisibility() == View.INVISIBLE) stringBuilder.append("0");
+        else stringBuilder.append("1");
         stringBuilder.append(",");
 
         //Calibrate

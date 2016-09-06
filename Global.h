@@ -2,7 +2,7 @@
 
 #define wrap_180(x) (x < -180 ? x+360 : (x > 180 ? x - 360: x))
 #define CRAZY_ANGLE_THRESHOLD 48 * SCALING_FACTOR
-#define MPU_STABLE_DELAY 0//20000
+#define MPU_STABLE_DELAY 20000//20000
 //#define debug
 unsigned long timeOfLastSignal;
 
