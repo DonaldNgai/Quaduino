@@ -371,7 +371,10 @@
                     android:layout_height="wrap_content"
                     android:text="Fine Tune"
                     android:id="@+id/fineBox"
-                    android:textColor="#ffffff" />
+                    android:layout_gravity="center_horizontal"
+                    android:checked="false"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#ffffff" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -473,6 +476,16 @@
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Rate"
+                android:id="@+id/rate_checkbox"
+                android:layout_gravity="center_horizontal"
+                android:checked="true"
+                android:textColor="#ffffff"
+                android:buttonTint="#ffffff" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Control"
                 android:id="@+id/control_checkbox"
                 android:layout_gravity="center_horizontal"
@@ -488,7 +501,8 @@
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom">
+        android:layout_gravity="center_horizontal|bottom"
+        android:visibility="visible">
 
         <Button
             android:layout_width="wrap_content"
@@ -497,13 +511,6 @@
             android:id="@+id/calibrate_phone"
             android:layout_gravity="center_vertical"
             android:onClick="calibratePhone" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Calibrate Drone"
-            android:id="@+id/calibrate_drone"
-            android:onClick="calibrateDrone" />
 
         <Button
             android:layout_width="wrap_content"
@@ -528,42 +535,56 @@
             android:id="@+id/debug_button"
             android:onClick="debug" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Output"
+            android:id="@+id/output_button"
+            android:onClick="output" />
+
     </LinearLayout>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="225dp"
+        android:layout_height="206dp"
         android:layout_gravity="center_horizontal|top"
         android:id="@+id/debug_window"
         android:background="#ffffff"
         android:visibility="invisible"
         android:weightSum="1">
 
-        <TextView
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="115dp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:id="@+id/debug_text"
-            android:maxHeight="250dp"
-            android:background="#ffffff"
-            android:textColor="#000000"
-            android:visibility="visible"
-            android:maxLines="15"
-            android:scrollbars="vertical"
-            android:layout_weight="1.05" />
+            android:layout_height="fill_parent">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:id="@+id/outputWindow"
-            android:maxHeight="250dp"
-            android:background="#ffffff"
-            android:textColor="#000000"
-            android:visibility="invisible"
-            android:maxLines="3"
-            android:scrollbars="vertical" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/outputWindow"
+                android:maxHeight="250dp"
+                android:background="#ffffff"
+                android:textColor="#000000"
+                android:visibility="invisible"
+                android:maxLines="3"
+                android:scrollbars="vertical"
+                android:layout_weight="2.58"
+                android:gravity="top" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/debug_text"
+                android:maxHeight="250dp"
+                android:background="#ffffff"
+                android:textColor="#000000"
+                android:visibility="invisible"
+                android:maxLines="15"
+                android:scrollbars="vertical"
+                android:layout_weight="1.05" />
+        </RelativeLayout>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -585,7 +606,7 @@
                 android:layout_height="wrap_content"
                 android:text="Log Data"
                 android:id="@+id/logCheck"
-                android:checked="true" />
+                android:checked="false" />
         </LinearLayout>
 
     </LinearLayout>

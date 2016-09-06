@@ -66,6 +66,7 @@ public class Flight_Controller extends AppCompatActivity {
     public CheckBox beginCheck;
     public CheckBox armCheck;
     public CheckBox controlCheck;
+    public CheckBox rateCheck;
     public CheckBox scrollCheck;
     public CheckBox logCheck;
     public CheckBox fineCheck;
@@ -74,7 +75,6 @@ public class Flight_Controller extends AppCompatActivity {
     public TextView logBox;
     public LinearLayout debugWindow;
     public TextView stableText;
-    public boolean doCalibrate;
     public boolean PIDChanged = false;
     public boolean writeFailed = false;
     public boolean clearFailsafe = false;
@@ -85,6 +85,9 @@ public class Flight_Controller extends AppCompatActivity {
     public float cYaw,cRoll = 0;
     public float cPitch = -90;
     public float rawYaw,rawRoll,rawPitch = 0;
+
+    public double tempMultiplier = 1;
+    public double rateMultiplier = 1.5;
 
     public int originalProgress;
 
@@ -129,9 +132,8 @@ public class Flight_Controller extends AppCompatActivity {
 
     public void sendData(){
         //Data string is of the form
-        //Debug,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+        //CheckSum,Failsafe,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
         //0,1,1,15,23.96,21.29,30.21,3.431,2.231,1.213,3.213,2.213,1.321|
-        //has 63 characters
         StringBuilder stringBuilder = new StringBuilder(65);
 
         //Debug
@@ -149,9 +151,9 @@ public class Flight_Controller extends AppCompatActivity {
         stringBuilder.append(",");
 
         //Calibrate
-        if (doCalibrate){ stringBuilder.append("1"); doCalibrate = false;}
-        else {stringBuilder.append("0");}
-        stringBuilder.append(",");
+//        if (doCalibrate){ stringBuilder.append("1"); doCalibrate = false;}
+//        else {stringBuilder.append("0");}
+//        stringBuilder.append(",");
 
         //Change PID
         if (PIDChanged) { stringBuilder.append("1"); PIDChanged = false;}
@@ -162,17 +164,31 @@ public class Flight_Controller extends AppCompatActivity {
         stringBuilder.append(throttleBar.getProgress());stringBuilder.append(",");
 
         //Control
-        if (controlCheck.isChecked()) {
-            stringBuilder.append("1");stringBuilder.append(",");
-            stringBuilder.append(calibratedPhoneOrientation[0]);stringBuilder.append(",");
-            stringBuilder.append(calibratedPhoneOrientation[1]);stringBuilder.append(",");
-            stringBuilder.append(calibratedPhoneOrientation[2]);stringBuilder.append(",");
+        if (rateCheck.isChecked()) {
+            stringBuilder.append("0");stringBuilder.append(",");
         }
         else {
-            stringBuilder.append("0");stringBuilder.append(",");
-            stringBuilder.append("0");stringBuilder.append(",");
-            stringBuilder.append("0");stringBuilder.append(",");
-            stringBuilder.append("0");stringBuilder.append(",");
+            stringBuilder.append("1");stringBuilder.append(",");
+        }
+
+        if (controlCheck.isChecked()) {
+            //always sending 0 for yaw
+            tempMultiplier = rateCheck.isChecked() ? rateMultiplier : 1;
+            stringBuilder.append(0*tempMultiplier);
+            stringBuilder.append(",");
+            stringBuilder.append(calibratedPhoneOrientation[1]*tempMultiplier);
+            stringBuilder.append(",");
+            stringBuilder.append(calibratedPhoneOrientation[2]*tempMultiplier);
+            stringBuilder.append(",");
+        }
+        else{
+            //always sending 0 for yaw
+            stringBuilder.append(0);
+            stringBuilder.append(",");
+            stringBuilder.append(0);
+            stringBuilder.append(",");
+            stringBuilder.append(0);
+            stringBuilder.append(",");
         }
 
         //RP_PID
@@ -217,6 +233,7 @@ public class Flight_Controller extends AppCompatActivity {
         beginCheck = (CheckBox)findViewById(R.id.begin_checkbox);
         armCheck = (CheckBox)findViewById(R.id.arm_checkbox);
         controlCheck = (CheckBox)findViewById(R.id.control_checkbox);
+        rateCheck = (CheckBox)findViewById(R.id.rate_checkbox);
         scrollCheck = (CheckBox)findViewById(R.id.autoScrollCheck);
         logCheck = (CheckBox)findViewById(R.id.logCheck);
         fineCheck = (CheckBox)findViewById(R.id.fineBox);
@@ -647,8 +664,6 @@ public class Flight_Controller extends AppCompatActivity {
     }
 
     /////////////Buttons////////////
-    public void calibrateDrone(View v){ doCalibrate = true; }
-
     public void finish(View v){
         setResult(RESULT_OK,
                 new Intent().putExtra("YawP", Y_P).putExtra("YawI", Y_I).putExtra("YawD",Y_D).putExtra("RPP", RP_P).putExtra("RPI", RP_I).putExtra("RPD",RP_D));
@@ -659,6 +674,13 @@ public class Flight_Controller extends AppCompatActivity {
 //        L debugWindow = (TextView)findViewById(R.id.debug_text);
         int visibility = debugWindow.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE;
         debugWindow.setVisibility(visibility);
+        debugBox.setVisibility(visibility);
+    }
+
+    public void output(View v){
+        int visibility = debugWindow.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE;
+        debugWindow.setVisibility(visibility);
+        outputBox.setVisibility(visibility);
     }
 
     public void addThrottle(View v){

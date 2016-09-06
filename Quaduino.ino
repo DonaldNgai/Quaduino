@@ -33,7 +33,7 @@ void setup() {
 // ===                    SUPPORTING FUNCTIONS                     ===
 // ===================================================================
 
-bool control = false;
+bool rateAndControl = false;
 bool changePID = false;
 
 String temp = "";
@@ -49,7 +49,7 @@ void updateIndexes(){
 }
 
 void processString(){
-//Failsafe,Calibrate,PID,Throttle,Control,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
+//Failsafe,Calibrate,PID,Throttle,rateAndControl,PhoneYaw,PhonePitch,PhoneRoll,RP_P,RP_I,RP_D,Y_P,Y_I,Y_D|
 //,0,0,0,0,0,0,0.25,0.0,0.0,0.0,-0.01,0.0|
   int bluetoothInt;
   
@@ -113,10 +113,10 @@ void processString(){
       }
     }
    
-    //Control
+    //rateAndControl
     updateIndexes();
-    if (temp == "1") control = true;
-    else control = false;
+    if (temp == "1") rateAndControl = true;
+    else rateAndControl = false;
 
     updateIndexes();
     receivedYaw = temp.toInt();
@@ -125,10 +125,13 @@ void processString(){
     updateIndexes();
     receivedRoll = temp.toInt();
 
-    setY=map(receivedYaw,YAW_RMIN,YAW_RMAX,YAW_WMAX,YAW_WMIN);
+//    setY=map(receivedYaw,YAW_RMIN,YAW_RMAX,YAW_WMAX,YAW_WMIN);
+setY = receivedYaw;
 //    if (rate == false){
-      setR=map(receivedRoll,ROLL_RMIN,ROLL_RMAX,ROLL_WMIN,ROLL_WMAX);
-      setP=map(receivedPitch,PITCH_RMIN,PITCH_RMAX,PITCH_WMAX,PITCH_WMIN);
+//      setR=map(receivedRoll,ROLL_RMIN,ROLL_RMAX,ROLL_WMIN,ROLL_WMAX);
+//      setP=map(receivedPitch,PITCH_RMIN,PITCH_RMAX,PITCH_WMAX,PITCH_WMIN);
+setR = receivedRoll;
+setP = receivedPitch;
 //    }
 //    else{
 //      setR=map(receivedRoll,ROLL_RMIN,ROLL_RMAX,ROLL_WMIN*RX_RATE_SENSITIVITY,ROLL_WMAX*RX_RATE_SENSITIVITY);
@@ -193,23 +196,25 @@ void processString(){
       PIDroll.resetI();
       PIDpitch.resetI();
       PIDyaw.resetI();
-//      PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
-//      PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
-//      PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
-      PIDangleX.ChangeParameters(ANGLEX_KP,ANGLEX_KI,ANGLEX_KD,ANGLEX_MIN,ANGLEX_MAX);
-      PIDangleY.ChangeParameters(ANGLEY_KP,ANGLEY_KI,ANGLEY_KD,ANGLEY_MIN,ANGLEY_MAX);
+      PIDangleX.resetI();
+      PIDangleY.resetI();
+      PIDroll.ChangeParameters(ROLL_PID_KP,ROLL_PID_KI,ROLL_PID_KD,ROLL_PID_MIN,ROLL_PID_MAX);
+      PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
+      PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
+//      PIDangleX.ChangeParameters(ANGLEX_KP,ANGLEX_KI,ANGLEX_KD,ANGLEX_MIN,ANGLEX_MAX);
+//      PIDangleY.ChangeParameters(ANGLEY_KP,ANGLEY_KI,ANGLEY_KD,ANGLEY_MIN,ANGLEY_MAX);
 //      
-      Serial.println(F("Roll"));
-      Serial.println("P: " + String(ANGLEX_KP) + " I: " + String(ANGLEX_KI) + " D: " + String(ANGLEX_KD) + " m: " + String(ANGLEX_MIN) + " M: " + String(ANGLEX_MAX));
-      Serial.println(F("Pitch"));
-      Serial.println("P: " + String(ANGLEY_KP) + " I: " + String(ANGLEY_KI) + " D: " + String(ANGLEY_KD) + " m: " + String(ANGLEY_MIN) + " M: " + String(ANGLEY_MAX));
-
 //      Serial.println(F("Roll"));
-//      Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
+//      Serial.println("P: " + String(ANGLEX_KP) + " I: " + String(ANGLEX_KI) + " D: " + String(ANGLEX_KD) + " m: " + String(ANGLEX_MIN) + " M: " + String(ANGLEX_MAX));
 //      Serial.println(F("Pitch"));
-//      Serial.println("P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX));
-//      Serial.println(F("Yaw"));
-//      Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
+//      Serial.println("P: " + String(ANGLEY_KP) + " I: " + String(ANGLEY_KI) + " D: " + String(ANGLEY_KD) + " m: " + String(ANGLEY_MIN) + " M: " + String(ANGLEY_MAX));
+
+      Serial.println(F("Roll"));
+      Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
+      Serial.println(F("Pitch"));
+      Serial.println("P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX));
+      Serial.println(F("Yaw"));
+      Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
     }
 
     //reset
@@ -318,13 +323,13 @@ void updateOrientationData() {
 
 void getPIDValues(){
   
-  if (control == true){ 
+  if (rateAndControl == true){ 
 //    setP=(int)PIDangleY.Compute(setP+smoothP,gy_aver,setP/RX_ANGLE_DAMPNING); 
 //    setR=(int)PIDangleX.Compute(setR-smoothR,gx_aver,setR/RX_ANGLE_DAMPNING); 
     setP=(int)PIDangleY.Compute(setP+angles[0],gy_aver,setP/RX_ANGLE_DAMPNING); 
     setR=(int)PIDangleX.Compute(setR-angles[1],gx_aver,setR/RX_ANGLE_DAMPNING); 
   } 
-
+  printStuff();
   PIDroll_val= (int)PIDroll.Compute(setR-gy_aver); 
   PIDpitch_val= (int)PIDpitch.Compute(setP-gx_aver); 
   PIDyaw_val= (int)PIDyaw.Compute(wrap_180(setY-gz_aver));
@@ -376,7 +381,7 @@ void printStuff(){
     //  Serial.print(", YPID: " + String(PIDyaw_val) + ", PPID: " + String(PIDpitch_val) + ", RPID: " + String(PIDroll_val) );
     //  Serial.println(" setY: " + String(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180) + " setP: " + String(setP-smoothP) + " setR: " + String(setR-smoothR));
     
-      Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
+//      Serial.print("M1: " + String(m1_val) + ", M2: " + String(m2_val) + ", M3: " + String(m3_val) + ", M4: " + String(m4_val));
       Serial.print(" setY: " + String(setY) + " setP: " + String(setP) + " setR: " + String(setR));
 
 //      Serial.print(" setY: " + String(receivedYaw) + " setP: " + String(receivedPitch) + " setR: " + String(receivedRoll));
@@ -386,6 +391,7 @@ void printStuff(){
 
       Serial.print(" PIDY: " + String(PIDyaw_val) + " PIDP: " + String(PIDpitch_val) + " PIDR: " + String(PIDroll_val));
 
+      //Needed so that the phone knows to reset throttle when failsafe is triggered by drone
       Serial.println(" F:" + String(failSafe));
       printTimer = millis();
     }
@@ -401,10 +407,10 @@ void loop(){
 //  unsigned long temp = 0;
     //1-6 millis
   if (millis()-slowLoopTimer >= SLOW_SAMPLE_TIME){
+    
     getBluetoothData();
     if (failSafe) {Serial.println(F("FAIL!"));}
-
-    printStuff();
+    
 //    updateOrientationData();
     updateAcc();
     slowLoopTimer = millis();

@@ -27,13 +27,13 @@ unsigned long timeOfLastSignal;
 //#define ACC_Y_FILTER_OFFSET -1058
 //#define ACC_Z_FILTER_OFFSET 15059
 
-#define ACC_X_OFFSET  1832//1832
-#define ACC_Y_OFFSET  880
-#define ACC_Z_OFFSET  1041
+#define ACC_X_OFFSET  1836//1832
+#define ACC_Y_OFFSET  910
+#define ACC_Z_OFFSET  1059
 
 #define GYRO_X_OFFSET  42
-#define GYRO_Y_OFFSET  -33
-#define GYRO_Z_OFFSET  19
+#define GYRO_Y_OFFSET  -30
+#define GYRO_Z_OFFSET  16
 
 
 #define SPLIT  0.99 //COMP-filter nr
@@ -70,7 +70,7 @@ double PITCH_PID_KD = 0;
 double PITCH_PID_MIN = -600.0;
 double PITCH_PID_MAX = 600.0;
 
-double YAW_PID_KP = 2;
+double YAW_PID_KP = 0.5;
 double YAW_PID_KI =  0.0;
 double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
