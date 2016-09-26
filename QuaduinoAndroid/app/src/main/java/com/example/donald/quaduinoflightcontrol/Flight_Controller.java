@@ -99,19 +99,21 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
     //What the starting PID values should be
-    public final double RP_P_FINAL = 2.0;
+    public final double RP_P_FINAL = 50.0;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
-    public final double Y_P_FINAL = 0.027;
+    public final double Y_P_FINAL = 10;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
     //How much to increase values when changing
-    public double RP_P_AMOUNT = 0.05;
+    public double RP_P_AMOUNT = 5.0;
     public double RP_I_AMOUNT = 0.05;
     public double RP_D_AMOUNT = 0.05;
-    public double Y_P_AMOUNT = 0.5;
+    public double Y_P_AMOUNT = 5.0;
     public double Y_I_AMOUNT = 0.05;
     public double Y_D_AMOUNT = 0.05;
+
+    public double FINE_AMOUNT = 0.5;
 
     public SeekBar throttleBar;
 
@@ -271,9 +273,9 @@ public class Flight_Controller extends AppCompatActivity {
                                                  public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                  double amount;
                  if (isChecked) {
-                     amount = 0.1;
+                     amount = FINE_AMOUNT;
                  } else {
-                    amount = 10;
+                    amount = 1/FINE_AMOUNT;
                  }
                  RP_P_AMOUNT    = RP_P_AMOUNT * amount ;
                  RP_I_AMOUNT    = RP_I_AMOUNT * amount ;

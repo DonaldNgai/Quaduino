@@ -349,7 +349,7 @@ void getPIDValues(){
 }
 
 void adjustMotors(){
-  printStuff();
+  
   
   m1_val =throttle+PIDroll_val+PIDpitch_val+PIDyaw_val;
 //  m2_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
@@ -374,7 +374,7 @@ void adjustMotors(){
   else if (m4_val < MOTOR_RUN_LEVEL) m4_val = MOTOR_RUN_LEVEL;
   else if(m4_val >= MAX_SIGNAL) m4_val = MAX_SIGNAL;
 
-
+  printStuff();
     MOTOR1.writeMicroseconds(m1_val);
     MOTOR2.writeMicroseconds(m2_val);
     MOTOR3.writeMicroseconds(m3_val);

@@ -63,8 +63,8 @@ void updateGyroData(){
 //  GXIndex = (GXIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
 //  GYIndex = (GYIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
 //  GZIndex = (GZIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  Serial.println(" gX1: " + String(gyroX) + " gY1: " + String(gyroY) + " gZ1: " + String(gyroZ));
-  Serial.println(" gX: " + String(gx_aver) + " gY: " + String(gy_aver) + " gZ: " + String(gz_aver));
+//  Serial.println(" gX1: " + String(gyroX) + " gY1: " + String(gyroY) + " gZ1: " + String(gyroZ));
+//  Serial.println(" gX: " + String(gx_aver) + " gY: " + String(gy_aver) + " gZ: " + String(gz_aver));
 
 }
 

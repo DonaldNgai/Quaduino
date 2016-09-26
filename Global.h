@@ -54,7 +54,7 @@ bool failSafe = false;
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 0.02;
+double ROLL_PID_KP = 50;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0;
@@ -62,7 +62,7 @@ double ROLL_PID_KD = 0;
 double ROLL_PID_MIN = -600.0;
 double ROLL_PID_MAX = 600.0;
 
-double PITCH_PID_KP = 0.02;
+double PITCH_PID_KP = 50;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0;
@@ -70,7 +70,7 @@ double PITCH_PID_KD = 0;
 double PITCH_PID_MIN = -600.0;
 double PITCH_PID_MAX = 600.0;
 
-double YAW_PID_KP = 0.5;
+double YAW_PID_KP = 10;
 double YAW_PID_KI =  0.0;
 double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
@@ -209,7 +209,7 @@ Servo MOTOR4;
 //#define MOTOR_ZERO_LEVEL 620
 #define MAX_SIGNAL 1460
 //Minimum Value before motors begin spinning
-#define MOTOR_RUN_LEVEL 580
+#define MOTOR_RUN_LEVEL 600
 //Value at which motors are not moving
 #define MOTOR_ZERO_LEVEL 550
 

@@ -551,12 +551,12 @@
         android:layout_gravity="center_horizontal|top"
         android:id="@+id/debug_window"
         android:background="#ffffff"
-        android:visibility="invisible"
+        android:visibility="visible"
         android:weightSum="1">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="181dp">
 
             <TextView
                 android:layout_width="match_parent"
@@ -594,7 +594,7 @@
 
             <CheckBox
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="19dp"
                 android:text="Auto-Scroll"
                 android:id="@+id/autoScrollCheck"
                 android:layout_gravity="center|bottom"
@@ -603,7 +603,7 @@
 
             <CheckBox
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="19dp"
                 android:text="Log Data"
                 android:id="@+id/logCheck"
                 android:checked="false" />
