@@ -307,9 +307,9 @@ void updateOrientationData() {
             yprdegree[2] = int((ypr[2] * 180/M_PI)*SCALING_FACTOR);
             Serial.println(" Y: " + String(yprdegree[0]) + " smP: " + String(yprdegree[1]) + " smR: " + String(yprdegree[2]));
 
-            smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,YinIndex);
-            smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,PinIndex);
-            smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,RinIndex);
+            smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,yawsortedArray,YinIndex,filterSamples);
+            smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,pitchsortedArray,PinIndex,filterSamples);
+            smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,rollsortedArray,RinIndex,filterSamples);
               Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
 
             //failsafe while debugging
@@ -319,9 +319,9 @@ void updateOrientationData() {
               Serial.println(F("Crazy Angle"));
             }
             
-            YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-            PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-            RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+//            YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+//            PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+//            RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
                         
         }
     }
@@ -335,7 +335,7 @@ void getPIDValues(){
     setP=(int)PIDangleY.Compute(setP+angles[0],gy_aver,setP/RX_ANGLE_DAMPNING); 
     setR=(int)PIDangleX.Compute(setR-angles[1],gx_aver,setR/RX_ANGLE_DAMPNING); 
   } 
-  printStuff();
+  
   PIDroll_val= (int)PIDroll.Compute(setR-gy_aver); 
   PIDpitch_val= (int)PIDpitch.Compute(setP-gx_aver); 
   PIDyaw_val= (int)PIDyaw.Compute(wrap_180(setY-gz_aver));
@@ -349,6 +349,8 @@ void getPIDValues(){
 }
 
 void adjustMotors(){
+  printStuff();
+  
   m1_val =throttle+PIDroll_val+PIDpitch_val+PIDyaw_val;
 //  m2_val=throttle-PIDroll_val+PIDpitch_val-PIDyaw_val;
   m2_val=throttle+PIDroll_val-PIDpitch_val-PIDyaw_val;

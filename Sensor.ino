@@ -56,14 +56,15 @@ void updateGyroData(){
   
   mpu.getRotation(&gyroX,&gyroY,&gyroZ);
 
-  gx_aver = digitalSmooth(gyroX,gyroXSmoothArray,GXIndex);
-  gy_aver = digitalSmooth(gyroY,gyroYSmoothArray,GYIndex);
-  gz_aver = digitalSmooth(gyroZ,gyroZSmoothArray,GZIndex);
+  gx_aver = digitalSmooth(gyroX,gyroXSmoothArray,gyroXsortedArray,&GXIndex,gyroFilterSamples);
+  gy_aver = digitalSmooth(gyroY,gyroYSmoothArray,gyroYsortedArray,&GYIndex,gyroFilterSamples);
+  gz_aver = digitalSmooth(gyroZ,gyroZSmoothArray,gyroZsortedArray,&GZIndex,gyroFilterSamples);
 
-  GXIndex = (GXIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  GYIndex = (GYIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  GZIndex = (GZIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-//  Serial.println(" gX: " + String(gx_aver) + " gY: " + String(gy_aver) + " gX: " + String(gz_aver));
+//  GXIndex = (GXIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+//  GYIndex = (GYIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+//  GZIndex = (GZIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  Serial.println(" gX1: " + String(gyroX) + " gY1: " + String(gyroY) + " gZ1: " + String(gyroZ));
+  Serial.println(" gX: " + String(gx_aver) + " gY: " + String(gy_aver) + " gZ: " + String(gz_aver));
 
 }
 

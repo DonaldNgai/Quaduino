@@ -146,11 +146,17 @@ int gyroZ;
 int yawSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 int pitchSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 int rollSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
+int yawsortedArray [filterSamples];
+int pitchsortedArray [filterSamples];
+int rollsortedArray [filterSamples];
 
-#define gyroFilterSamples 17
+#define gyroFilterSamples 17 // smooth will get rid of top and bottom 2 if size is 17
 int gyroXSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
 int gyroYSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
 int gyroZSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
+int gyroXsortedArray [gyroFilterSamples];
+int gyroYsortedArray [gyroFilterSamples];
+int gyroZsortedArray [gyroFilterSamples];
 
 #define bluetoothDataLength 70
 
