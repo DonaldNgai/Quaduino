@@ -29,6 +29,8 @@ void updateSensorVal(){
 //    Serial.println(" X: " + String(accx) + " Y: " + String(accy));
   angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accx;
   angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accy;
+//      Serial.println(" Pitch: " + String(angles[0]) + " Roll: " + String(angles[1]));
+
   tp=t; 
 }
 
@@ -56,9 +58,9 @@ void updateGyroData(){
   
   mpu.getRotation(&gyroX,&gyroY,&gyroZ);
 
-  gx_aver = digitalSmooth(gyroX,gyroXSmoothArray,gyroXsortedArray,&GXIndex,gyroFilterSamples);
-  gy_aver = digitalSmooth(gyroY,gyroYSmoothArray,gyroYsortedArray,&GYIndex,gyroFilterSamples);
-  gz_aver = digitalSmooth(gyroZ,gyroZSmoothArray,gyroZsortedArray,&GZIndex,gyroFilterSamples);
+  gx_aver = digitalSmooth(int(gyroX/LSB_SENSITIVITY),gyroXSmoothArray,gyroXsortedArray,&GXIndex,gyroFilterSamples);
+  gy_aver = digitalSmooth(int(gyroY/LSB_SENSITIVITY),gyroYSmoothArray,gyroYsortedArray,&GYIndex,gyroFilterSamples);
+  gz_aver = digitalSmooth(int(gyroZ/LSB_SENSITIVITY),gyroZSmoothArray,gyroZsortedArray,&GZIndex,gyroFilterSamples);
 
 //  GXIndex = (GXIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
 //  GYIndex = (GYIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable

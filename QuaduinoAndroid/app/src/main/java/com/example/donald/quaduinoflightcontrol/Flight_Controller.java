@@ -99,17 +99,17 @@ public class Flight_Controller extends AppCompatActivity {
     public double Y_D = 0;
     public final int THROTTLE_AMOUNT = 2;
     //What the starting PID values should be
-    public final double RP_P_FINAL = 50.0;
+    public final double RP_P_FINAL = 0.7;
     public final double RP_I_FINAL = 0;
     public final double RP_D_FINAL = 0;
-    public final double Y_P_FINAL = 10;
+    public final double Y_P_FINAL = 2.5;
     public final double Y_I_FINAL = 0;
     public final double Y_D_FINAL = 0;
     //How much to increase values when changing
-    public double RP_P_AMOUNT = 5.0;
+    public double RP_P_AMOUNT = 1.0;
     public double RP_I_AMOUNT = 0.05;
     public double RP_D_AMOUNT = 0.05;
-    public double Y_P_AMOUNT = 5.0;
+    public double Y_P_AMOUNT = 1.0;
     public double Y_I_AMOUNT = 0.05;
     public double Y_D_AMOUNT = 0.05;
 
@@ -251,7 +251,7 @@ public class Flight_Controller extends AppCompatActivity {
         Calendar c = Calendar.getInstance();
         time = Integer.toString(c.get(Calendar.DAY_OF_MONTH)) + "_" + Integer.toString(c.get(Calendar.HOUR_OF_DAY)) + "_" + Integer.toString(c.get(Calendar.MINUTE));
         appendLog("RP_P,\tRP_I,\tRP_D,\tY_P,\tY_I,\tY_D");
-        appendLog(String.format("%-5s, %-5s, %-5s, %-5s, %-5s, %-5s",RP_P_FINAL,RP_I_FINAL,RP_D_FINAL,Y_P_FINAL,Y_I_FINAL,Y_D_FINAL));
+        appendLog(String.format("%-5s, %-5s, %-5s, %-5s, %-5s, %-5s\n",RP_P_FINAL,RP_I_FINAL,RP_D_FINAL,Y_P_FINAL,Y_I_FINAL,Y_D_FINAL));
 
         beginCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 

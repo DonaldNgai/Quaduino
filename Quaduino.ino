@@ -1,5 +1,7 @@
 // I2Cdev, MPU6050 and BMP180 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
+
+//gyro.x = roll, gyro.y = pitch, gyro.z = yaw. 
 #include "I2Cdev.h"
 #include <Wire.h>
 #include <Servo.h>
@@ -336,9 +338,9 @@ void getPIDValues(){
     setR=(int)PIDangleX.Compute(setR-angles[1],gx_aver,setR/RX_ANGLE_DAMPNING); 
   } 
   
-  PIDroll_val= (int)PIDroll.Compute(setR-gy_aver); 
-  PIDpitch_val= (int)PIDpitch.Compute(setP-gx_aver); 
-  PIDyaw_val= (int)PIDyaw.Compute(wrap_180(setY-gz_aver));
+  PIDroll_val= (int)PIDroll.Compute((double)(setR-gy_aver)); 
+  PIDpitch_val= (int)PIDpitch.Compute((double)(setP-gx_aver)); 
+  PIDyaw_val= (int)PIDyaw.Compute((double)(wrap_180(setY-gz_aver)));
 
   //  PIDyaw_val = (int)PIDyaw.Compute(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180);
     //To prevent extremely small PID values
@@ -395,7 +397,7 @@ void printStuff(){
 //      Serial.print(" setY: " + String(receivedYaw) + " setP: " + String(receivedPitch) + " setR: " + String(receivedRoll));
 //      Serial.print("P:" + String(angles[0]) + " R:" + String(angles[1]));
 
-      Serial.print("smGY:" + String(gz_aver) + "smGP:" + String(gy_aver) + "smGR:" + String(gx_aver));
+      Serial.print("smGY:" + String(gz_aver) + "smGP:" + String(gx_aver) + "smGR:" + String(gy_aver));
 
       Serial.print("PIDY:" + String(PIDyaw_val) + "PIDP:" + String(PIDpitch_val) + "PIDR:" + String(PIDroll_val));
 

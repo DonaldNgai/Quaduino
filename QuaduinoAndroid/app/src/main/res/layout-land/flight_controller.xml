@@ -551,7 +551,7 @@
         android:layout_gravity="center_horizontal|top"
         android:id="@+id/debug_window"
         android:background="#ffffff"
-        android:visibility="visible"
+        android:visibility="invisible"
         android:weightSum="1">
 
         <RelativeLayout

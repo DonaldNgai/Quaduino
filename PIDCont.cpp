@@ -47,12 +47,14 @@ double dt=(double)(tn-tp);
   double U = (double) (P + I + D);
   Ip = I;
   tp=tn;
+//  Serial.print("E:" + String(mError) + "P:" + String(P) + "kp:" + String(kp) + "U:" + String(U) + "I:" + String(I) + "D:" + String(D));
   if(U>Hval){
     U = Hval;
   }
   else if (U<Lval){
     U = Lval; 
   }
+//  Serial.println("Uf:" + String(U));
 return U;
 
 }
