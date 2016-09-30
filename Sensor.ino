@@ -29,6 +29,12 @@ void updateSensorVal(){
 //    Serial.println(" X: " + String(accx) + " Y: " + String(accy));
   angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accx;
   angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accy;
+  
+  if (abs(angles[0]) + abs(angles[1]) > CRAZY_ANGLE_THRESHOLD){
+              failSafe = true;
+              Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+              Serial.println(F("Crazy Angle"));
+  }
 //      Serial.println(" Pitch: " + String(angles[0]) + " Roll: " + String(angles[1]));
 
   tp=t; 

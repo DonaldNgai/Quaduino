@@ -80,13 +80,13 @@ double YAW_PID_KD = 0.0;
 double YAW_PID_MIN = -50.0;
 double YAW_PID_MAX = 50.0;
 
-double ANGLEX_KP = 5.0;
+double ANGLEX_KP = 4.5;
 double ANGLEX_KI = 0.0;//0.02;
 double ANGLEX_KD = 0.0;//-0.015;
 double ANGLEX_MIN = -100.0;
 double ANGLEX_MAX = 100.0;
 
-double ANGLEY_KP = 5.0;
+double ANGLEY_KP = 4.5;
 double ANGLEY_KI = 0.0;//0.02;
 double ANGLEY_KD = 0.0;//-0.015;
 double ANGLEY_MIN = -100.0;
