@@ -40,9 +40,9 @@ unsigned long timeOfLastSignal;
 #define SPLIT  0.99 //COMP-filter nr
 #define RadToDeg 180.0/PI 
 
-#define FAST_SAMPLE_TIME 1250 //400Hz using Micros() //1000 millisecond(1 sec) per 100 commands = 10 milliseconds per command
+#define FAST_SAMPLE_TIME 1250 //800Hz using Micros()
 #define SLOW_SAMPLE_TIME 20 //50Hz using Millis()
-#define PRINT_TIME 100
+#define PRINT_TIME 100//100 using Millis()
 unsigned long printTimer = 0;
 unsigned long slowLoopTimer = 0;
 unsigned long fastLoopTimer = 0;
@@ -55,7 +55,7 @@ bool failSafe = false;
 //PID VARIABLES//
 /////////////////
 
-double ROLL_PID_KP = 0.7;
+double ROLL_PID_KP = 0.7;//0.7;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0.0;
@@ -63,7 +63,7 @@ double ROLL_PID_KD = 0.0;
 double ROLL_PID_MIN = -50.0;
 double ROLL_PID_MAX = 50.0;
 
-double PITCH_PID_KP = 0.7;
+double PITCH_PID_KP = 0.7;//0.7;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0.0;
@@ -71,7 +71,7 @@ double PITCH_PID_KD = 0.0;
 double PITCH_PID_MIN = -50.0;
 double PITCH_PID_MAX = 50.0;
 
-double YAW_PID_KP = 2.5;
+double YAW_PID_KP = 2.5;//2.5;
 double YAW_PID_KI =  0.0;
 double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
@@ -151,7 +151,7 @@ int yawsortedArray [filterSamples];
 int pitchsortedArray [filterSamples];
 int rollsortedArray [filterSamples];
 
-#define gyroFilterSamples 17 // smooth will get rid of top and bottom 2 if size is 17
+#define gyroFilterSamples 29 // smooth will get rid of top and bottom 2 if size is 17
 int gyroXSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
 int gyroYSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
 int gyroZSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
@@ -159,7 +159,7 @@ int gyroXsortedArray [gyroFilterSamples];
 int gyroYsortedArray [gyroFilterSamples];
 int gyroZsortedArray [gyroFilterSamples];
 
-#define bluetoothDataLength 70
+#define bluetoothDataLength 90
 
 //////////
 //BMP180//
