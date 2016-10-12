@@ -2,7 +2,7 @@
 #define LSB_SENSITIVITY 131
 
 #define wrap_180(x) (x < -180 ? x+360 : (x > 180 ? x - 360: x))
-#define CRAZY_ANGLE_THRESHOLD 48 * SCALING_FACTOR
+#define CRAZY_ANGLE_THRESHOLD 48
 #define MPU_STABLE_DELAY 20000//20000
 //#define debug
 unsigned long timeOfLastSignal;
@@ -54,22 +54,22 @@ bool failSafe = false;
 /////////////////
 //PID VARIABLES//
 /////////////////
-
+//RATE PIDS
 double ROLL_PID_KP = 0.7;//0.7;
 //double ROLL_PID_KI = 0.950;
 //double ROLL_PID_KD = 0.011;
 double ROLL_PID_KI = 0.0;
 double ROLL_PID_KD = 0.0;
-double ROLL_PID_MIN = -50.0;
-double ROLL_PID_MAX = 50.0;
+double ROLL_PID_MIN = -500.0;
+double ROLL_PID_MAX = 500.0;
 
 double PITCH_PID_KP = 0.7;//0.7;
 //double PITCH_PID_KI = 0.950;
 //double PITCH_PID_KD = 0.011;
 double PITCH_PID_KI = 0.0;
 double PITCH_PID_KD = 0.0;
-double PITCH_PID_MIN = -50.0;
-double PITCH_PID_MAX = 50.0;
+double PITCH_PID_MIN = -500.0;
+double PITCH_PID_MAX = 500.0;
 
 double YAW_PID_KP = 2.5;//2.5;
 double YAW_PID_KI =  0.0;
@@ -77,20 +77,21 @@ double YAW_PID_KD = 0.0;
 //double YAW_PID_KP = 0.680;
 //double YAW_PID_KI =  0.500;
 //double YAW_PID_KD = 0.0001;
-double YAW_PID_MIN = -50.0;
-double YAW_PID_MAX = 50.0;
+double YAW_PID_MIN = -500.0;
+double YAW_PID_MAX = 500.0;
 
+//ORIENTATION PIDS
 double ANGLEX_KP = 4.5;
 double ANGLEX_KI = 0.0;//0.02;
 double ANGLEX_KD = 0.0;//-0.015;
-double ANGLEX_MIN = -100.0;
-double ANGLEX_MAX = 100.0;
+double ANGLEX_MIN = -250.0;
+double ANGLEX_MAX = 250.0;
 
 double ANGLEY_KP = 4.5;
 double ANGLEY_KI = 0.0;//0.02;
 double ANGLEY_KD = 0.0;//-0.015;
-double ANGLEY_MIN = -100.0;
-double ANGLEY_MAX = 100.0;
+double ANGLEY_MIN = -250.0;
+double ANGLEY_MAX = 250.0;
 
 //Define the PID class
 PIDCont PIDroll;

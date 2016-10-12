@@ -647,13 +647,14 @@ public class Flight_Controller extends AppCompatActivity {
                     rawPitch = Math.round(Math.toDegrees(orientation[1])-90);
                     rawRoll = Math.round(Math.toDegrees(orientation[2]));
                     //-180 - 0 - 180
+                    //Flipped roll and pitch since the phone will be held in portrait mode
 //                calibratedPhoneOrientation[0] = ((yaw + (360 - (cYaw + 180))) % 360) - 180;
                     calibratedPhoneOrientation[0] = Math.round((((rawYaw - cYaw) + 180)%360)-180);
                     //-90 - 0 - 270
-                    calibratedPhoneOrientation[1] = Math.round((((rawPitch - cPitch) + 180)%360)-180);
+                    calibratedPhoneOrientation[2] = Math.round((((rawPitch - cPitch) + 180)%360)-180);
                     //-180 - 0 - 180
                     //made it negative to match orientation of the drone
-                    calibratedPhoneOrientation[2] = -Math.round((((rawRoll - cRoll) + 180)%360)-180);
+                    calibratedPhoneOrientation[1] = -Math.round((((rawRoll - cRoll) + 180)%360)-180);
 //                    ((TextView)findViewById(R.id.origY)).setText("Yaw: "+ rawYaw);
 //                    ((TextView)findViewById(R.id.origP)).setText("Pitch: "+ rawPitch);
 //                    ((TextView)findViewById(R.id.origR)).setText("Roll: "+ rawRoll);
