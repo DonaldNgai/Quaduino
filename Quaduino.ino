@@ -364,16 +364,27 @@ void updateOrientationData() {
 void getPIDValues(){
   
   if (rateAndControl == true){ 
-//    Serial.println("h");
+//    if (debug && millis() - printTimer > PRINT_TIME)
+//    Serial.print("h");
+//    Serial.print(" recP: " + String(receivedPitch) + " recR: " + String(receivedRoll));
+//    Serial.print("P:" + String(angles[0]) + " R:" + String(angles[1]));
 //    setP=(int)PIDangleY.Compute(setP+smoothP,gy_aver,setP/RX_ANGLE_DAMPNING); 
 //    setR=(int)PIDangleX.Compute(setR-smoothR,gx_aver,setR/RX_ANGLE_DAMPNING); 
-    setP=(int)PIDangleY.Compute(setP+angles[0],gy_aver,setP/RX_ANGLE_DAMPNING); 
-    setR=(int)PIDangleX.Compute(setR-angles[1],gx_aver,setR/RX_ANGLE_DAMPNING); 
+    setP=(int)PIDangleY.Compute(receivedPitch-angles[0]); 
+    setR=(int)PIDangleX.Compute(receivedRoll+angles[1]); 
+//    Serial.println(" setP: " + String(setP) + " setR: " + String(setR));
+//    setP=(int)PIDangleY.Compute(setP+angles[0],gy_aver,setP/RX_ANGLE_DAMPNING); 
+//    setR=(int)PIDangleX.Compute(setR-angles[1],gx_aver,setR/RX_ANGLE_DAMPNING); 
   } 
   
   PIDroll_val= (int)PIDroll.Compute((double)(setR-gy_aver)); 
   PIDpitch_val= (int)PIDpitch.Compute((double)(setP-gx_aver)); 
   PIDyaw_val= (int)PIDyaw.Compute((double)(wrap_180(setY-gz_aver)));
+
+//  Serial.print("G");
+//  Serial.print("setY:" + String(setY) + "setP: " + String(setP) + "setR: " + String(setR));
+//  Serial.print("smGY:" + String(gz_aver) + "smGP:" + String(gx_aver) + "smGR:" + String(gy_aver));
+//  Serial.println("PIDY:" + String(PIDyaw_val) + "PIDP:" + String(PIDpitch_val) + "PIDR:" + String(PIDroll_val));
 
   //  PIDyaw_val = (int)PIDyaw.Compute(((((int)((smoothY - setY) + 180) % 360) + 360) % 360)-180);
     //To prevent extremely small PID values
@@ -426,13 +437,13 @@ void printStuff(){
     
       Serial.print("M1:" + String(m1_val) + "M2:" + String(m2_val) + "M3:" + String(m3_val) + "M4:" + String(m4_val));
 //      Serial.print("setY:" + String(setY) + "setP: " + String(setP) + "setR: " + String(setR));
+      Serial.print(" recY: " + String(receivedYaw) + " recP: " + String(receivedPitch) + " recR: " + String(receivedRoll));
 
-//      Serial.print(" setY: " + String(receivedYaw) + " setP: " + String(receivedPitch) + " setR: " + String(receivedRoll));
-//      Serial.print("P:" + String(angles[0]) + " R:" + String(angles[1]));
+      Serial.print("P:" + String(angles[0]) + " R:" + String(angles[1]));
 
       Serial.print("smGY:" + String(gz_aver) + "smGP:" + String(gx_aver) + "smGR:" + String(gy_aver));
-
-      Serial.print("PIDY:" + String(PIDyaw_val) + "PIDP:" + String(PIDpitch_val) + "PIDR:" + String(PIDroll_val));
+//
+//      Serial.print("PIDY:" + String(PIDyaw_val) + "PIDP:" + String(PIDpitch_val) + "PIDR:" + String(PIDroll_val));
 
       //Needed so that the phone knows to reset throttle when failsafe is triggered by drone
 //      Serial.print(" F:" + String(failSafe));

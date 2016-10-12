@@ -27,8 +27,8 @@ void updateSensorVal(){
   float accy = atan2(accy_temp,accz_temp)*RadToDeg;
 //    Serial.println(" aX: " + String(accx_temp) + " aY: " + String(accy_temp) + " aX: " + String(accz_temp));
 //    Serial.println(" X: " + String(accx) + " Y: " + String(accy));
-  angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accx;
-  angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accy;
+  angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accy;
+  angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accx;
   
   if (abs(angles[0]) + abs(angles[1]) > CRAZY_ANGLE_THRESHOLD){
               failSafe = true;
