@@ -144,7 +144,7 @@ int gyroY;
 int gyroZ;
 
 //Variables to smooth data from MPU6050
-#define filterSamples   9              // filterSamples should  be an odd number, no smaller than 3
+#define filterSamples   5              // filterSamples should  be an odd number, no smaller than 3
 int yawSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 int pitchSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
 int rollSmoothArray [filterSamples];   // array for holding raw sensor values for yaw 
@@ -152,7 +152,7 @@ int yawsortedArray [filterSamples];
 int pitchsortedArray [filterSamples];
 int rollsortedArray [filterSamples];
 
-#define gyroFilterSamples 29 // smooth will get rid of top and bottom 2 if size is 17
+#define gyroFilterSamples 11 // smooth will get rid of top and bottom 2 if size is 17
 int gyroXSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
 int gyroYSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 
 int gyroZSmoothArray [gyroFilterSamples];   // array for holding raw sensor values for yaw 

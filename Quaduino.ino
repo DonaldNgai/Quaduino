@@ -288,78 +288,78 @@ void getBluetoothData(){
   }
 }
 
-int smoothY,smoothP,smoothR;
-int YinIndex,PinIndex,RinIndex;
-
-void updateOrientationData() {
-    Quaternion q;           // [w, x, y, z]         quaternion container
-    VectorFloat gravity;    // [x, y, z]            gravity vector
-    float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
-    // if programming failed, don't try to do anything
-    if (!dmpReady) return;
-    
-  // get current FIFO count
-  fifoCount = mpu.getFIFOCount();
-  while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-  if (mpu.getFIFOCount() >= packetSize)
-  {
-    // reset interrupt flag and get INT_STATUS byte
-    mpuInterrupt = false;
-    mpuIntStatus = mpu.getIntStatus();
-
-    fifoCount = mpu.getFIFOCount();
-  
-    // check for overflow (this should never happen unless our code is too inefficient)
-      if ((mpuIntStatus & 0x10) || fifoCount >= 1024) 
-        {
-          // reset so we can continue cleanly
-          mpu.resetFIFO();
-          Serial.println(F("FIFO overflow!"));
-  
-      // otherwise, check for DMP data ready interrupt (this should happen frequently)
-        } 
-      else if (mpuIntStatus & 0x02) 
-        {
-        // wait for correct available data length, should be a VERY short wait
-        
-
-        // Remove all the old data - maybe need to do -1
-        mpu.getFIFOBytes(fifoBuffer, fifoCount - packetSize);
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-        mpu.resetFIFO();
-        // track FIFO count here in case there is > 1 packet available
-        // (this lets us immediately read more without waiting for an interrupt)
-//        fifoCount -= packetSize;
-        
-            // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            yprdegree[0] = int((ypr[0] * 180/M_PI)*SCALING_FACTOR);
-            yprdegree[1] = int((ypr[1] * 180/M_PI)*SCALING_FACTOR);
-            yprdegree[2] = int((ypr[2] * 180/M_PI)*SCALING_FACTOR);
-            Serial.println(" Y: " + String(yprdegree[0]) + " smP: " + String(yprdegree[1]) + " smR: " + String(yprdegree[2]));
-
-            smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,yawsortedArray,YinIndex,filterSamples);
-            smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,pitchsortedArray,PinIndex,filterSamples);
-            smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,rollsortedArray,RinIndex,filterSamples);
-              Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
-
-            //failsafe while debugging
-            if (abs(smoothP) + abs(smoothR) > CRAZY_ANGLE_THRESHOLD){
-              failSafe = true;
-              Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
-              Serial.println(F("Crazy Angle"));
-            }
-            
-//            YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-//            PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-//            RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-                        
-        }
-    }
-}
+//int smoothY,smoothP,smoothR;
+//int YinIndex,PinIndex,RinIndex;
+//
+//void updateOrientationData() {
+//    Quaternion q;           // [w, x, y, z]         quaternion container
+//    VectorFloat gravity;    // [x, y, z]            gravity vector
+//    float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+//    // if programming failed, don't try to do anything
+//    if (!dmpReady) return;
+//    
+//  // get current FIFO count
+//  fifoCount = mpu.getFIFOCount();
+//  while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+//  if (mpu.getFIFOCount() >= packetSize)
+//  {
+//    // reset interrupt flag and get INT_STATUS byte
+//    mpuInterrupt = false;
+//    mpuIntStatus = mpu.getIntStatus();
+//
+//    fifoCount = mpu.getFIFOCount();
+//  
+//    // check for overflow (this should never happen unless our code is too inefficient)
+//      if ((mpuIntStatus & 0x10) || fifoCount >= 1024) 
+//        {
+//          // reset so we can continue cleanly
+//          mpu.resetFIFO();
+//          Serial.println(F("FIFO overflow!"));
+//  
+//      // otherwise, check for DMP data ready interrupt (this should happen frequently)
+//        } 
+//      else if (mpuIntStatus & 0x02) 
+//        {
+//        // wait for correct available data length, should be a VERY short wait
+//        
+//
+//        // Remove all the old data - maybe need to do -1
+//        mpu.getFIFOBytes(fifoBuffer, fifoCount - packetSize);
+//        // read a packet from FIFO
+//        mpu.getFIFOBytes(fifoBuffer, packetSize);
+//        mpu.resetFIFO();
+//        // track FIFO count here in case there is > 1 packet available
+//        // (this lets us immediately read more without waiting for an interrupt)
+////        fifoCount -= packetSize;
+//        
+//            // display Euler angles in degrees
+//            mpu.dmpGetQuaternion(&q, fifoBuffer);
+//            mpu.dmpGetGravity(&gravity, &q);
+//            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+//            yprdegree[0] = int((ypr[0] * 180/M_PI)*SCALING_FACTOR);
+//            yprdegree[1] = int((ypr[1] * 180/M_PI)*SCALING_FACTOR);
+//            yprdegree[2] = int((ypr[2] * 180/M_PI)*SCALING_FACTOR);
+//            Serial.println(" Y: " + String(yprdegree[0]) + " smP: " + String(yprdegree[1]) + " smR: " + String(yprdegree[2]));
+//
+//            smoothY = digitalSmooth(yprdegree[0],yawSmoothArray,yawsortedArray,YinIndex,filterSamples);
+//            smoothP = digitalSmooth(yprdegree[1],pitchSmoothArray,pitchsortedArray,PinIndex,filterSamples);
+//            smoothR = digitalSmooth(yprdegree[2],rollSmoothArray,rollsortedArray,RinIndex,filterSamples);
+//              Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+//
+//            //failsafe while debugging
+//            if (abs(smoothP) + abs(smoothR) > CRAZY_ANGLE_THRESHOLD){
+//              failSafe = true;
+//              Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+//              Serial.println(F("Crazy Angle"));
+//            }
+//            
+////            YinIndex = (YinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+////            PinIndex = (PinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+////            RinIndex = (RinIndex + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+//                        
+//        }
+//    }
+//}
 
 void getPIDValues(){
   

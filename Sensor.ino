@@ -8,6 +8,7 @@
 unsigned long tp;
 unsigned long ts=millis();
 unsigned long tf=micros();
+int PinIndex,RinIndex;
 
 void updateSensorVal(){
 //  if((micros()-tf)>1300){
@@ -27,12 +28,16 @@ void updateSensorVal(){
   float accy = atan2(accy_temp,accz_temp)*RadToDeg;
 //    Serial.println(" aX: " + String(accx_temp) + " aY: " + String(accy_temp) + " aX: " + String(accz_temp));
 //    Serial.println(" X: " + String(accx) + " Y: " + String(accy));
-  angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accy;
-  angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accx;
+//  angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accy;
+//  angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accx;
+  int p = SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accy;
+  int r = SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accx;
+    angles[0]=digitalSmooth(p,pitchSmoothArray,pitchsortedArray,&PinIndex,filterSamples);
+    angles[1]=digitalSmooth(r,rollSmoothArray,rollsortedArray,&RinIndex,filterSamples);
   
   if (abs(angles[0]) + abs(angles[1]) > CRAZY_ANGLE_THRESHOLD){
               failSafe = true;
-              Serial.println(" smY: " + String(smoothY) + " smP: " + String(smoothP) + " smR: " + String(smoothR));
+              Serial.println("P: " + String(angles[0]) + " R: " + String(angles[1]));
               Serial.println(F("Crazy Angle"));
   }
 //      Serial.println(" Pitch: " + String(angles[0]) + " Roll: " + String(angles[1]));
