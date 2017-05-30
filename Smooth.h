@@ -4,7 +4,8 @@
 
 int digitalSmooth(int rawIn, int *sensSmoothArray, int *sortedArray, int *inIndex, int bufferSize){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
   int j, k, top, bottom;
-  int temp, total;
+  int temp;
+  long total;
  // static int raw[bufferSize];
   
   boolean done;
