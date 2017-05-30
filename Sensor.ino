@@ -57,14 +57,17 @@ void updateAcc(){//High pass filter
 //  accz_temp=(ACC_HPF_NR*accz_temp+(100-ACC_HPF_NR)*buffer[2])/100;
 //    angles[0]=digitalSmooth(p,pitchSmoothArray,pitchsortedArray,&PinIndex,filterSamples);
 //    angles[1]=digitalSmooth(r,rollSmoothArray,rollsortedArray,&RinIndex,filterSamples);
-  accx_temp = digitalSmooth(buffer[0],accXSmoothArray,accXsortedArray,&AXIndex,accFilterSamples);
-  accy_temp = digitalSmooth(buffer[1],accYSmoothArray,accYsortedArray,&AYIndex,accFilterSamples);
-  accz_temp = digitalSmooth(buffer[2],accZSmoothArray,accZsortedArray,&AZIndex,accFilterSamples);
+
+//  if (buffer[2] > 32000)Serial.println("AccZ might be too large for filter");
+//  
+  accx_temp = digitalSmooth(int(buffer[0]/ACCEL_LSB_SENSITIVITY),accXSmoothArray,accXsortedArray,&AXIndex,accFilterSamples);
+  accy_temp = digitalSmooth(int(buffer[1]/ACCEL_LSB_SENSITIVITY),accYSmoothArray,accYsortedArray,&AYIndex,accFilterSamples);
+  accz_temp = digitalSmooth(int(buffer[2]/ACCEL_LSB_SENSITIVITY),accZSmoothArray,accZsortedArray,&AZIndex,accFilterSamples);
 //  accx_temp = buffer[0];
 //  accy_temp = buffer[1];
 //  accz_temp = buffer[2];
   Serial.println(" aX: " + String(accx_temp) + " aY: " + String(accy_temp) + " aZ: " + String(accz_temp));
-  Serial.println(" bX: " + String(buffer[0]) + " bY: " + String(buffer[1]) + " bZ: " + String(buffer[2]));
+//  Serial.println(" bX: " + String(buffer[0]) + " bY: " + String(buffer[1]) + " bZ: " + String(buffer[2]));
 
 }
 
@@ -74,9 +77,9 @@ void updateGyroData(){
   
   mpu.getRotation(&gyroX,&gyroY,&gyroZ);
 
-  gx_aver = digitalSmooth(int(gyroX/LSB_SENSITIVITY),gyroXSmoothArray,gyroXsortedArray,&GXIndex,gyroFilterSamples);
-  gy_aver = digitalSmooth(int(gyroY/LSB_SENSITIVITY),gyroYSmoothArray,gyroYsortedArray,&GYIndex,gyroFilterSamples);
-  gz_aver = digitalSmooth(int(gyroZ/LSB_SENSITIVITY),gyroZSmoothArray,gyroZsortedArray,&GZIndex,gyroFilterSamples);
+  gx_aver = digitalSmooth(int(gyroX/GYRO_LSB_SENSITIVITY),gyroXSmoothArray,gyroXsortedArray,&GXIndex,gyroFilterSamples);
+  gy_aver = digitalSmooth(int(gyroY/GYRO_LSB_SENSITIVITY),gyroYSmoothArray,gyroYsortedArray,&GYIndex,gyroFilterSamples);
+  gz_aver = digitalSmooth(int(gyroZ/GYRO_LSB_SENSITIVITY),gyroZSmoothArray,gyroZsortedArray,&GZIndex,gyroFilterSamples);
 
 //  GXIndex = (GXIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
 //  GYIndex = (GYIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
