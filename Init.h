@@ -20,8 +20,6 @@ void initCommunication()
     #endif
 
     // initialize serial communication
-    // (115200 chosen because it is required for Teapot Demo output, but it's
-    // really up to you depending on your project)
     Serial.begin(115200);
     while (!Serial); // wait for Leonardo enumeration, others continue immediately
 }
@@ -44,20 +42,9 @@ void initMPU(){
     Serial.println(F("Testing device connections..."));
     Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
     
-//   // wait for ready
-//    Serial.println(F("\nSend any character to initialize DMP"));
-//     while (Serial.available() && Serial.read()); // empty buffer
-////     while (!Serial.available());                 // wait for data
-//     while (Serial.available() && Serial.read()){// empty buffer again
-//    } 
-//
-//    // load and configure the DMP
-//    Serial.println(F("Initializing DMP..."));
-//    devStatus = mpu.dmpInitialize();
+    //Your offsets:  1832 880 1041 42 -33 19
 
-//Your offsets:  1832 880 1041 42 -33 19
-
-//For my own chip
+    //For my own chip
     mpu.setXGyroOffset(GYRO_X_OFFSET);
     mpu.setYGyroOffset(GYRO_Y_OFFSET);
     mpu.setZGyroOffset(GYRO_Z_OFFSET);
@@ -67,14 +54,6 @@ void initMPU(){
 
     // make sure it worked (returns 0 if so)
     if (mpu.testConnection()) {
-        // turn on the DMP, now that it's ready
-//        Serial.println(F("Enabling DMP..."));
-//        mpu.setDMPEnabled(true);
-
-        // enable Arduino interrupt detection
-//        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-//        attachInterrupt(0, dmpDataReady, RISING);
-//        mpuIntStatus = mpu.getIntStatus();
 
         Serial.println(F("Roll"));
         Serial.println("P: " + String(ROLL_PID_KP) + " I: " + String(ROLL_PID_KI) + " D: " + String(ROLL_PID_KD) + " m: " + String(ROLL_PID_MIN) + " M: " + String(ROLL_PID_MAX));
@@ -82,14 +61,6 @@ void initMPU(){
         Serial.println("P: " + String(PITCH_PID_KP) + " I: " + String(PITCH_PID_KI) + " D: " + String(PITCH_PID_KD) + " m: " + String(PITCH_PID_MIN) + " M: " + String(PITCH_PID_MAX));
         Serial.println(F("Yaw"));
         Serial.println("P: " + String(YAW_PID_KP) + " I: " + String(YAW_PID_KI) + " D: " + String(YAW_PID_KD) + " m: " + String(YAW_PID_MIN) + " M: " + String(YAW_PID_MAX));
-
-        // set our DMP Ready flag so the main loop() function knows it's okay to use it
-//        Serial.println(F("DMP ready! Waiting for first interrupt..."));
-//        dmpReady = true;
-
-        // get expected DMP packet size for later comparison
-//        packetSize = mpu.dmpGetFIFOPacketSize();
-//        Serial.println(F("Waiting for DMP to stablilize"));
 
         delay(MPU_STABLE_DELAY);
         Serial.println(F("*********************************************************************************"));
@@ -102,53 +73,18 @@ void initMPU(){
         prevR = setR;
         
     } 
-//    else {
-//        // ERROR!
-//        // 1 = initial memory load failed
-//        // 2 = DMP configuration updates failed
-//        // (if it's going to break, usually the code will be 1)
-//        Serial.print(("DMP Initialization failed (code "));
-//        Serial.print(devStatus);
-//        Serial.println(F(")"));
-//    }
 }
 
-//void initBMP(){
-//  if (pressure.begin())
-//    Serial.println("BMP180 init success");
-//    else
-//    {
-//      // Oops, something went wrong, this is usually a connection problem,
-//      // see the comments at the top of this sketch for the proper connections.
-//  
-//      Serial.println("BMP180 init fail (disconnected?)\n\n");
-//      while(1); // Pause forever.
-//    }
-//
-//    baseline = getPressure();
-//    
-//    Serial.print("baseline pressure: ");
-//    Serial.print(baseline);
-//    Serial.println(" mb");  
-//}
-
 void initMotors(){
-   
-//  pinMode(MOTOR1,OUTPUT);
-//  pinMode(MOTOR2,OUTPUT);
-//  pinMode(MOTOR3,OUTPUT);
-//  pinMode(MOTOR4,OUTPUT);
+  
   MOTOR1.attach(MOTOR1PIN);
   MOTOR2.attach(MOTOR2PIN);
   MOTOR3.attach(MOTOR3PIN);
   MOTOR4.attach(MOTOR4PIN);
+  
   //Arm motor
   throttle = map(0,0,100,MOTOR_ZERO_LEVEL,MAX_SIGNAL);
 
-//  analogWrite(MOTOR1,throttle);
-//  analogWrite(MOTOR2,throttle);
-//  analogWrite(MOTOR3,throttle);
-//  analogWrite(MOTOR4,throttle);
   MOTOR1.writeMicroseconds(throttle);
   MOTOR2.writeMicroseconds(throttle);
   MOTOR3.writeMicroseconds(throttle);

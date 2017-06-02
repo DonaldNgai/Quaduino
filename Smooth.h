@@ -6,23 +6,25 @@ int digitalSmooth(int rawIn, int *sensSmoothArray, int *sortedArray, int *inInde
   int j, k, top, bottom;
   int temp;
   long total;
- // static int raw[bufferSize];
   
   boolean done;
 
   sensSmoothArray[*inIndex] = rawIn;                 // input new data into the oldest slot
   *inIndex = (*inIndex + 1) % bufferSize;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-  // Serial.print("raw = ");
 
-  for (j=0; j<bufferSize; j++){     // transfer data array into anther array for sorting and averaging
+  for (j=0; j<bufferSize; j++)// transfer data array into anther array for sorting and averaging
+  {     
     sortedArray[j] = sensSmoothArray[j];
   }
 
-  done = 0;                // flag to know when we're done sorting              
-  while(done != 1){        // simple swap sort, sorts numbers from lowest to highest
+  done = 0; // flag to know when we're done sorting              
+  while(done != 1) // simple swap sort, sorts numbers from lowest to highest
+  {        
     done = 1;
-    for (j = 0; j < (bufferSize - 1); j++){
-      if (sortedArray[j] > sortedArray[j + 1]){     // numbers are out of order - swap
+    for (j = 0; j < (bufferSize - 1); j++)
+    {
+      if (sortedArray[j] > sortedArray[j + 1])  // numbers are out of order - swap
+      {     
         temp = sortedArray[j + 1];
         sortedArray [j+1] =  sortedArray[j] ;
         sortedArray [j] = temp;
@@ -44,7 +46,8 @@ int digitalSmooth(int rawIn, int *sensSmoothArray, int *sortedArray, int *inInde
   top = min((((bufferSize * 85) / 100) + 1  ), (bufferSize - 1));   // the + 1 is to make up for asymmetry caused by integer rounding
   k = 0;
   total = 0;
-  for ( j = bottom; j< top; j++){
+  for ( j = bottom; j< top; j++)
+  {
     total += sortedArray[j];  // total remaining indices
     k++; 
 //     Serial.print(sortedArray[j]); 

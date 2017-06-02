@@ -1,27 +1,12 @@
-//float gx_temp[GYRO_MAF_NR]={
-//  0.0,0.0};
-//float gy_temp[GYRO_MAF_NR]={
-//  0.0,0.0};
-//float gz_temp[GYRO_MAF_NR]={
-//  0.0,0.0};
-
 unsigned long tp;
-unsigned long ts=millis();
-unsigned long tf=micros();
 int GXIndex,GYIndex,GZIndex;
 int AXIndex, AYIndex, AZIndex;
 float filteredGyroX,filteredGyroY,filteredGyroZ = 0.0;
+float filteredAccelPitch,filteredAccelRoll = 0.0;
 float gx_old, gy_old, gz_old = 0.0;
 
 void updateSensorVal(){
-//  if((micros()-tf)>1300){
-//    updateGyro();  //Update only per 1300us, (~800Hz update rate)
-//    tf=micros();  
-//  }
-//  if((millis()-ts)>20){  //Update only once per 20ms (50Hz update rate)
-//    
-//    ts=millis();
-//  }
+
   unsigned long t = millis();
   float dt = (float)(t-tp)/1000.0;
   
@@ -38,15 +23,18 @@ void updateSensorVal(){
   accRoll = accRoll * RadToDeg;
 
   //Apply Low Pass Filter
+  filteredAccelPitch = (ONE_MINUS_ALPHA * accPitch) + (ALPHA * filteredAccelPitch);
+  filteredAccelRoll = (ONE_MINUS_ALPHA * accRoll) + (ALPHA * filteredAccelRoll);
 
   //Apply Complimentary Filter
-  angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accy;
-  angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accx;
+  angles[0] = ONE_MINUS_ALPHA * (angles[0] + (filteredGyroY * dt)) + (ALPHA * filteredAccelPitch);
+  angles[1] = ONE_MINUS_ALPHA * (angles[1] + (filteredGyroX * dt)) + (ALPHA * filteredAccelRoll);
 
-  if (abs(angles[0]) + abs(angles[1]) > CRAZY_ANGLE_THRESHOLD){
-              failSafe = true;
-              Serial.println("P: " + String(angles[0]) + " R: " + String(angles[1]));
-              Serial.println(F("Crazy Angle"));
+  if (abs(angles[0]) + abs(angles[1]) > CRAZY_ANGLE_THRESHOLD)
+  {
+      failSafe = true;
+      Serial.println("P: " + String(angles[0]) + " R: " + String(angles[1]));
+      Serial.println(F("Crazy Angle"));
   }
 
   tp=t; 
@@ -74,16 +62,13 @@ void updateGyroData(){
   gy_aver = digitalSmooth(int(gyroY/GYRO_LSB_SENSITIVITY),gyroYSmoothArray,gyroYsortedArray,&GYIndex,gyroFilterSamples);
   gz_aver = digitalSmooth(int(gyroZ/GYRO_LSB_SENSITIVITY),gyroZSmoothArray,gyroZsortedArray,&GZIndex,gyroFilterSamples);
 
+  gyroHPF();
 }
 
 void gyroHPF(){//High Pass filter
-  #if GYRO_HPF_NR > 0
-  
-  float oneMinusAlpha = (1-ALPHA);
 
-  filteredGyroX= oneMinusAlpha*filteredGyroX + oneMinusAlpha*(gx_aver - gx_old);
-  filteredGyroY= oneMinusAlpha*filteredGyroY + oneMinusAlpha*(gy_aver - gy_old);
-  filteredGyroZ= oneMinusAlpha*filteredGyroZ + oneMinusAlpha*(gz_aver - gz_old);
+  filteredGyroX= (ONE_MINUS_ALPHA*filteredGyroX) + (ONE_MINUS_ALPHA*(gx_aver - gx_old));
+  filteredGyroY= (ONE_MINUS_ALPHA*filteredGyroY) + (ONE_MINUS_ALPHA*(gy_aver - gy_old));
+  filteredGyroZ= (ONE_MINUS_ALPHA*filteredGyroZ) + (ONE_MINUS_ALPHA*(gz_aver - gz_old));
   
-#endif
 }
