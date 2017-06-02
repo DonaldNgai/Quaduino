@@ -1,6 +1,7 @@
 #define SCALING_FACTOR 100
 #define GYRO_LSB_SENSITIVITY 131
 #define ACCEL_LSB_SENSITIVITY 16384
+#define GYRO_HPF_NR 0
 
 #define wrap_180(x) (x < -180 ? x+360 : (x > 180 ? x - 360: x))
 #define CRAZY_ANGLE_THRESHOLD 48

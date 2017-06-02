@@ -8,8 +8,10 @@
 unsigned long tp;
 unsigned long ts=millis();
 unsigned long tf=micros();
-//int PinIndex,RinIndex;
+int GXIndex,GYIndex,GZIndex;
 int AXIndex, AYIndex, AZIndex;
+float filteredGyroX,filteredGyroY,filteredGyroZ = 0.0;
+float gx_old, gy_old, gz_old = 0.0;
 
 void updateSensorVal(){
 //  if((micros()-tf)>1300){
@@ -71,59 +73,28 @@ void updateAcc(){//High pass filter
 
 }
 
-int GXIndex,GYIndex,GZIndex;
-
 void updateGyroData(){
   
   mpu.getRotation(&gyroX,&gyroY,&gyroZ);
+
+  gx_old=gx_aver;
+  gy_old=gy_aver;
+  gz_old=gz_aver;
 
   gx_aver = digitalSmooth(int(gyroX/GYRO_LSB_SENSITIVITY),gyroXSmoothArray,gyroXsortedArray,&GXIndex,gyroFilterSamples);
   gy_aver = digitalSmooth(int(gyroY/GYRO_LSB_SENSITIVITY),gyroYSmoothArray,gyroYsortedArray,&GYIndex,gyroFilterSamples);
   gz_aver = digitalSmooth(int(gyroZ/GYRO_LSB_SENSITIVITY),gyroZSmoothArray,gyroZsortedArray,&GZIndex,gyroFilterSamples);
 
-//  GXIndex = (GXIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-//  GYIndex = (GYIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-//  GZIndex = (GZIndex + 1) % gyroFilterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
-//  Serial.println(" gX1: " + String(gyroX) + " gY1: " + String(gyroY) + " gZ1: " + String(gyroZ));
-//  Serial.println(" gX: " + String(gx_aver) + " gY: " + String(gy_aver) + " gZ: " + String(gz_aver));
-
 }
 
-//void updateGyro(){
-//  float buffer[3]; //Gyro buffer
-//  MPU.getGyroData(buffer);
-//  for(byte i=0;i<(GYRO_MAF_NR-1);i++){
-//    gx_temp[i]=gx_temp[i+1];
-//    gy_temp[i]=gy_temp[i+1];
-//    gz_temp[i]=gz_temp[i+1];
-//  }
-//  gx_temp[GYRO_MAF_NR-1]=(float)(buffer[0]-GYRO_X_OFFSET);
-//  gy_temp[GYRO_MAF_NR-1]=(float)(buffer[1]-GYRO_Y_OFFSET);
-//  gz_temp[GYRO_MAF_NR-1]=(float)(buffer[2]-GYRO_Z_OFFSET);
-//  gyroMAF();
-//}
-//
-//void gyroMAF(){//Moving average filter
-//#if GYRO_HPF_NR > 0
-//  float gx_old=gx_aver;
-//  float gy_old=gy_aver;
-//  float gz_old=gz_aver;
-//#endif
-//  gx_aver=0;
-//  gy_aver=0;
-//  gz_aver=0;
-//  for(byte i=0;i<GYRO_MAF_NR;i++){
-//    gx_aver=gx_aver+gx_temp[i];
-//    gy_aver=gy_aver+gy_temp[i];
-//    gz_aver=gz_aver+gz_temp[i];
-//  }  
-//  gx_aver=(float)gx_aver/GYRO_MAF_NR;
-//  gy_aver=(float)gy_aver/GYRO_MAF_NR;
-//  gz_aver=(float)gz_aver/GYRO_MAF_NR;
-//
-//#if GYRO_HPF_NR > 0
-//  gx_aver=(GYRO_HPF_NR*gx_old+(100.0-GYRO_HPF_NR)*gx_aver)/100.0;
-//  gy_aver=(GYRO_HPF_NR*gy_old+(100.0-GYRO_HPF_NR)*gy_aver)/100.0;
-//  gz_aver=(GYRO_HPF_NR*gz_old+(100.0-GYRO_HPF_NR)*gz_aver)/100.0;
-//#endif
-//}
+void gyroHPF(){//High Pass filter
+  #if GYRO_HPF_NR > 0
+  
+  float oneMinusAlpha = (1-GYRO_HPF_NR);
+
+  filteredGyroX= oneMinusAlpha*filteredGyroX + oneMinusAlpha*(gx_aver - gx_old);
+  filteredGyroY= oneMinusAlpha*filteredGyroY + oneMinusAlpha*(gy_aver - gy_old);
+  filteredGyroZ= oneMinusAlpha*filteredGyroZ + oneMinusAlpha*(gz_aver - gz_old);
+  
+#endif
+}
