@@ -24,52 +24,41 @@ void updateSensorVal(){
 //  }
   unsigned long t = millis();
   float dt = (float)(t-tp)/1000.0;
-//  float x2 = accx_temp*accx_temp;
-//  float y2 = accy_temp*accy_temp;
-//  float z2 = accz_temp*accz_temp;
-  float accx = atan2(accx_temp,accz_temp)*RadToDeg;
-  float accy = atan2(accy_temp,accz_temp)*RadToDeg;
-//    Serial.println(" aX: " + String(accx_temp) + " aY: " + String(accy_temp) + " aX: " + String(accz_temp));
-//    Serial.println(" X: " + String(accx) + " Y: " + String(accy));
+  
+  float x2 = accx_temp*accx_temp;
+  float y2 = accy_temp*accy_temp;
+  float z2 = accz_temp*accz_temp;
+
+  //Apply Trigonometry to get Pitch and Roll
+  float accPitch = atan(accx_temp/sqrt(y2+z2));
+  float accRoll = atan(accy_temp/sqrt(x2+z2));
+
+  //Convert Radians to Degrees
+  accPitch = accPitch * RadToDeg;
+  accRoll = accRoll * RadToDeg;
+
+  //Apply Low Pass Filter
+
+  //Apply Complimentary Filter
   angles[0]=SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accy;
   angles[1]=SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accx;
-//  int p = SPLIT*(-gy_aver*dt+angles[0])+(1.0-SPLIT)*accy;
-//  int r = SPLIT*(gx_aver*dt+angles[1])+(1.0-SPLIT)*accx;
-//    angles[0]=digitalSmooth(p,pitchSmoothArray,pitchsortedArray,&PinIndex,filterSamples);
-//    angles[1]=digitalSmooth(r,rollSmoothArray,rollsortedArray,&RinIndex,filterSamples);
-  
+
   if (abs(angles[0]) + abs(angles[1]) > CRAZY_ANGLE_THRESHOLD){
               failSafe = true;
               Serial.println("P: " + String(angles[0]) + " R: " + String(angles[1]));
               Serial.println(F("Crazy Angle"));
   }
-//      Serial.println(" Pitch: " + String(angles[0]) + " Roll: " + String(angles[1]));
 
   tp=t; 
 }
 
-void updateAcc(){//High pass filter
+void updateAcc(){
   int buffer[3]; //Axl buffer
   mpu.getAcceleration(&buffer[0],&buffer[1],&buffer[2]);
-//  buffer[0]=buffer[0]-ACC_X_OFFSET; 
-//  buffer[1]=buffer[1]-ACC_Y_OFFSET;
-//  buffer[2]=buffer[2]-ACC_Z_OFFSET;
-//  accx_temp=(ACC_HPF_NR*accx_temp+(100-ACC_HPF_NR)*buffer[0])/100;
-//  accy_temp=(ACC_HPF_NR*accy_temp+(100-ACC_HPF_NR)*buffer[1])/100;
-//  accz_temp=(ACC_HPF_NR*accz_temp+(100-ACC_HPF_NR)*buffer[2])/100;
-//    angles[0]=digitalSmooth(p,pitchSmoothArray,pitchsortedArray,&PinIndex,filterSamples);
-//    angles[1]=digitalSmooth(r,rollSmoothArray,rollsortedArray,&RinIndex,filterSamples);
 
-//  if (buffer[2] > 32000)Serial.println("AccZ might be too large for filter");
-//  
   accx_temp = digitalSmooth(int(buffer[0]/ACCEL_LSB_SENSITIVITY),accXSmoothArray,accXsortedArray,&AXIndex,accFilterSamples);
   accy_temp = digitalSmooth(int(buffer[1]/ACCEL_LSB_SENSITIVITY),accYSmoothArray,accYsortedArray,&AYIndex,accFilterSamples);
   accz_temp = digitalSmooth(int(buffer[2]/ACCEL_LSB_SENSITIVITY),accZSmoothArray,accZsortedArray,&AZIndex,accFilterSamples);
-//  accx_temp = buffer[0];
-//  accy_temp = buffer[1];
-//  accz_temp = buffer[2];
-  Serial.println(" aX: " + String(accx_temp) + " aY: " + String(accy_temp) + " aZ: " + String(accz_temp));
-//  Serial.println(" bX: " + String(buffer[0]) + " bY: " + String(buffer[1]) + " bZ: " + String(buffer[2]));
 
 }
 
@@ -90,7 +79,7 @@ void updateGyroData(){
 void gyroHPF(){//High Pass filter
   #if GYRO_HPF_NR > 0
   
-  float oneMinusAlpha = (1-GYRO_HPF_NR);
+  float oneMinusAlpha = (1-ALPHA);
 
   filteredGyroX= oneMinusAlpha*filteredGyroX + oneMinusAlpha*(gx_aver - gx_old);
   filteredGyroY= oneMinusAlpha*filteredGyroY + oneMinusAlpha*(gy_aver - gy_old);
